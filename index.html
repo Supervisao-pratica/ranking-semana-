@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking Lab InovAção - Rumo ao Gol</title>
+    <style>
+        :root {
+            --azul-senac: #005596;
+            --laranja-senac: #FF7F00;
+            --grama: #4CAF50;
+        }
+        body { font-family: 'Arial', sans-serif; background: #e0e0e0; padding: 20px; }
+        .container { background: white; padding: 30px; border-radius: 15px; max-width: 900px; margin: auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        h1 { color: var(--azul-senac); text-align: center; }
+        h2 { color: #555; text-align: center; font-size: 1.1em; margin-bottom: 30px; }
+
+        /* Estilo do Campo */
+        .campo { background: var(--grama); padding: 20px; border: 5px solid white; border-radius: 10px; color: white; position: relative; }
+        .faixa-gol { border-right: 5px dashed white; text-align: right; padding-right: 10px; font-weight: bold; margin-bottom: 20px; }
+
+        .jogador-linha { margin-bottom: 20px; }
+        .info-jogador { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; }
+        
+        /* Barra de progresso (o caminho até o gol) */
+        .trilha { background: rgba(0,0,0,0.2); height: 30px; border-radius: 15px; overflow: hidden; position: relative; }
+        .bola { 
+            background: var(--laranja-senac); 
+            height: 100%; 
+            width: 0%; /* O JS ou edição manual controla isso */
+            transition: width 1.5s ease-in-out;
+            display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;
+            border-radius: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Etapa II - 18ª Semana de Aperfeiçoamento Docente</h1>
+    <h2>Lab InovAção: o desafio rumo ao gol!</h2>
+
+    <div class="campo">
+        <div class="faixa-gol">GOL! ⚽</div>
+
+        <!-- EDITE AQUI: Mude o "style='width: X%'" e o número dos pontos -->
+        
+        <div class="jogador-linha">
+            <div class="info-jogador"><span>Prof. João</span> <span>80 pts</span></div>
+            <div class="trilha"><div class="bola" style="width: 80%;">⚽</div></div>
+        </div>
+
+        <div class="jogador-linha">
+            <div class="info-jogador"><span>Profa. Maria</span> <span>60 pts</span></div>
+            <div class="trilha"><div class="bola" style="width: 60%;">⚽</div></div>
+        </div>
+
+        <div class="jogador-linha">
+            <div class="info-jogador"><span>Prof. Carlos</span> <span>40 pts</span></div>
+            <div class="trilha"><div class="bola" style="width: 40%;">⚽</div></div>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>
