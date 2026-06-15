@@ -1,61 +1,336 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <title>Ranking Lab InovAção - Campo de Futebol</title>
-    <style>
-        :root { --azul: #005596; --laranja: #FF7F00; --grama: #2d8a32; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; padding: 20px; }
-        .dashboard { max-width: 900px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        h1 { color: var(--azul); text-align: center; margin-bottom: 5px; }
-        p { text-align: center; color: #666; font-style: italic; margin-bottom: 30px; }
-        
-        /* O Campo */
-        .campo { background: var(--grama); padding: 30px; border: 4px solid white; border-radius: 10px; position: relative; }
-        .trilha { height: 40px; background: rgba(0,0,0,0.2); margin: 15px 0; border-radius: 20px; position: relative; display: flex; align-items: center; }
-        .jogador-bola { font-size: 25px; transition: left 1s ease; position: absolute; left: 0; }
-        .nome-jogador { color: white; font-weight: bold; margin-bottom: 5px; text-shadow: 1px 1px 2px #000; }
 
-        /* Painel Editável */
-        .painel-edicao { background: #eee; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 2px dashed var(--azul); }
-        input { padding: 5px; width: 60px; }
-        button { background: var(--laranja); color: white; border: none; padding: 5px 15px; cursor: pointer; border-radius: 5px; }
-    </style>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lab InovAção - Futebol Ranking</title>
+
+<style>
+:root{
+--azul:#005596;
+--laranja:#ff7f00;
+--verde1:#1d7a2a;
+--verde2:#278c36;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+
+body{
+font-family:Segoe UI,Arial,sans-serif;
+background:#f3f5f7;
+}
+
+header{
+background:linear-gradient(90deg,var(--azul),#0d74c5);
+color:white;
+padding:15px;
+text-align:center;
+}
+
+.layout{
+display:grid;
+grid-template-columns:1fr 360px;
+gap:15px;
+padding:15px;
+}
+
+.campo{
+height:850px;
+position:relative;
+overflow:auto;
+border-radius:15px;
+background:
+repeating-linear-gradient(
+90deg,
+var(--verde1) 0px,
+var(--verde1) 120px,
+var(--verde2) 120px,
+var(--verde2) 240px
+);
+border:5px solid white;
+box-shadow:0 4px 20px rgba(0,0,0,.2);
+}
+
+.linha-centro{
+position:absolute;
+left:50%;
+top:0;
+height:100%;
+width:4px;
+background:white;
+transform:translateX(-50%);
+}
+
+.circulo{
+position:absolute;
+left:50%;
+top:50%;
+width:180px;
+height:180px;
+border:4px solid white;
+border-radius:50%;
+transform:translate(-50%,-50%);
+}
+
+.gol{
+position:absolute;
+right:0;
+top:50%;
+transform:translateY(-50%);
+width:40px;
+height:220px;
+border:4px solid white;
+border-right:none;
+}
+
+.player{
+position:absolute;
+width:160px;
+transition:all 1s ease;
+}
+
+.nome{
+color:white;
+font-weight:bold;
+font-size:12px;
+text-shadow:1px 1px 2px black;
+}
+
+.bola{
+font-size:32px;
+}
+
+.pontos{
+font-size:11px;
+color:white;
+text-shadow:1px 1px 2px black;
+}
+
+.sidebar{
+background:white;
+border-radius:15px;
+padding:15px;
+max-height:850px;
+overflow:auto;
+}
+
+input{
+width:100%;
+padding:8px;
+margin:4px 0;
+}
+
+button{
+border:none;
+padding:6px 10px;
+border-radius:6px;
+cursor:pointer;
+margin:2px;
+color:white;
+background:var(--azul);
+}
+
+.laranja{
+background:var(--laranja);
+}
+
+.card{
+border:1px solid #ddd;
+padding:8px;
+border-radius:8px;
+margin-bottom:8px;
+}
+
+.rank{
+padding:5px;
+border-bottom:1px solid #eee;
+display:flex;
+justify-content:space-between;
+}
+
+.top1{background:#fff4c7;}
+.top2{background:#f0f0f0;}
+.top3{background:#ffe3c2;}
+</style>
 </head>
+
 <body>
 
-<div class="dashboard">
-    <h1>Etapa II da 18ª Semana de Aperfeiçoamento Docente</h1>
-    <p>Lab InovAção: um espaço para compartilhar experiências, trocar conhecimentos e inspirar novas práticas</p>
+<header>
+<h1>🏆 Lab InovAção</h1>
+<p>Etapa II da 18ª Semana de Aperfeiçoamento Docente</p>
+<p>Meta: 100 pontos até o gol</p>
+</header>
 
-    <!-- PAINEL DE CONTROLE -->
-    <div class="painel-edicao">
-        <strong>Gerenciar Pontos:</strong><br>
-        <input type="text" id="nome1" placeholder="Nome"> <input type="number" id="pts1" placeholder="Pts"> 
-        <button onclick="atualizar(1)">Atualizar</button>
-    </div>
+<div class="layout">
 
-    <!-- CAMPO -->
-    <div class="campo">
-        <div id="linha1" class="trilha">
-            <div id="bola1" class="jogador-bola">⚽</div>
-        </div>
-        <div id="nomeDisplay1" class="nome-jogador">Jogador 1</div>
-    </div>
+<div class="campo" id="campo">
+<div class="linha-centro"></div>
+<div class="circulo"></div>
+<div class="gol"></div>
+</div>
+
+<div class="sidebar">
+
+<h3>Adicionar Participante</h3>
+
+<input id="novoNome" placeholder="Digite o nome">
+<button onclick="adicionar()">Adicionar</button>
+
+<hr><br>
+
+<h3>🏆 Ranking</h3>
+<div id="ranking"></div>
+
+<br>
+
+<h3>⚙️ Controle</h3>
+<div id="controles"></div>
+
+</div>
+
 </div>
 
 <script>
-    function atualizar(id) {
-        let nome = document.getElementById('nome'+id).value;
-        let pts = document.getElementById('pts'+id).value;
-        
-        // Atualiza nome
-        document.getElementById('nomeDisplay'+id).innerText = nome;
-        
-        // Atualiza bola (max 90% para não sair do campo)
-        let posicao = pts > 90 ? 90 : pts;
-        document.getElementById('bola1').style.left = posicao + "%";
-    }
+
+let participantes = [];
+
+function salvar(){
+localStorage.setItem("rankingFutebol2026",JSON.stringify(participantes));
+}
+
+function carregar(){
+const dados = localStorage.getItem("rankingFutebol2026");
+if(dados){
+participantes = JSON.parse(dados);
+}
+}
+
+function adicionar(){
+
+const nome = document.getElementById("novoNome").value.trim();
+
+if(!nome) return;
+
+participantes.push({
+id:Date.now(),
+nome:nome,
+pontos:0
+});
+
+document.getElementById("novoNome").value="";
+
+atualizar();
+}
+
+function editarNome(id,valor){
+
+const p = participantes.find(x=>x.id===id);
+
+if(p){
+p.nome = valor;
+salvar();
+render();
+}
+
+}
+
+function alterar(id,valor){
+
+const p = participantes.find(x=>x.id===id);
+
+if(!p) return;
+
+p.pontos += valor;
+
+if(p.pontos < 0){
+p.pontos = 0;
+}
+
+atualizar();
+
+}
+
+function atualizar(){
+salvar();
+render();
+}
+
+function render(){
+
+const ranking = [...participantes].sort((a,b)=>b.pontos-a.pontos);
+
+document.getElementById("ranking").innerHTML =
+ranking.map((p,i)=>`
+<div class="rank ${i===0?'top1':i===1?'top2':i===2?'top3':''}">
+<span>${i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'º'} ${p.nome}</span>
+<strong>${p.pontos}</strong>
+</div>
+`).join("");
+
+document.getElementById("controles").innerHTML =
+participantes.map(p=>`
+<div class="card">
+
+<input
+value="${p.nome}"
+onchange="editarNome(${p.id},this.value)">
+
+<strong>${p.pontos} pts</strong><br>
+
+<button onclick="alterar(${p.id},10)">+10</button>
+<button onclick="alterar(${p.id},20)">+20</button>
+<button onclick="alterar(${p.id},50)">+50</button>
+<button class="laranja" onclick="alterar(${p.id},-10)">-10</button>
+
+</div>
+`).join("");
+
+renderCampo(ranking);
+
+}
+
+function renderCampo(ranking){
+
+const campo = document.getElementById("campo");
+
+campo.querySelectorAll(".player").forEach(x=>x.remove());
+
+ranking.forEach((p,index)=>{
+
+const progresso = Math.min((p.pontos/100)*90,90);
+
+const linha = index*45+20;
+
+const div = document.createElement("div");
+
+div.className="player";
+
+div.style.left = progresso + "%";
+div.style.top = linha + "px";
+
+let icone = "⚽";
+
+if(p.pontos >= 100){
+icone = "⚽🥅";
+}
+
+div.innerHTML=`
+<div class="nome">${p.nome}</div>
+<div class="bola">${icone}</div>
+<div class="pontos">${p.pontos} pts</div>
+`;
+
+campo.appendChild(div);
+
+});
+
+}
+
+carregar();
+render();
+
 </script>
 
 </body>
