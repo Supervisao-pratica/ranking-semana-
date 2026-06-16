@@ -3,142 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab InovAção - Copa do Mundo</title>
+    <title>Lab InovAção - Festa da Copa</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --azul: #0038A8;
-            --amarelo: #FFD100;
-            --verde: #009B3A;
-            --verde-claro: #3cb043;
-            --verde-escuro: #2a7e2b;
-            --branco: #FFFFFF;
+            --azul: #005596;
+            --laranja: #ff7f00;
+            --grama-clara: #3a8220;
+            --grama-escura: #306e18;
+            --vidro: rgba(255, 255, 255, 0.9);
         }
         * { box-sizing: border-box; }
         
+        /* Fundo Animado de Festa */
         body { 
-            margin: 0; font-family: 'Segoe UI', Arial, sans-serif; 
-            background: radial-gradient(circle, #005596 0%, #001a33 100%);
-            color: #333; overflow-x: hidden;
-            height: 100vh; display: flex; flex-direction: column;
+            margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: #333; overflow-x: hidden;
+            background: linear-gradient(-45deg, #005596, #00873E, #FFCC00, #ff7f00);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        /* Overlay para liberar o Áudio */
-        #bloqueioAudio {
-            position: fixed; inset: 0; background: var(--verde); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: white; text-align: center;
-        }
-        #bloqueioAudio h1 { font-size: 50px; text-transform: uppercase; color: var(--amarelo); text-shadow: 2px 2px 0 var(--azul); }
-        #bloqueioAudio button {
-            background: var(--amarelo); color: var(--azul); font-size: 24px; padding: 15px 40px;
-            border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            transition: 0.3s;
-        }
-        #bloqueioAudio button:hover { transform: scale(1.1); }
+        /* Elementos flutuantes (Bandeiras) */
+        .decoracao-fundo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; opacity: 0.6; }
+        .flutuante { position: absolute; font-size: 30px; animation: subir linear infinite; bottom: -50px; }
+        @keyframes subir { to { transform: translateY(-110vh) rotate(360deg); } }
 
         header { 
-            background: rgba(0, 0, 0, 0.7); color: var(--amarelo); text-align: center; padding: 15px; 
-            border-bottom: 5px solid var(--verde); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            z-index: 10; flex-shrink: 0;
+            background: rgba(0, 0, 0, 0.6); color: #fff; text-align: center; padding: 15px; 
+            border-bottom: 4px solid var(--laranja); backdrop-filter: blur(5px);
         }
-        h1 { margin: 0; font-size: 28px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); letter-spacing: 1px; }
+        h1 { margin: 0; font-size: 32px; text-transform: uppercase; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
 
-        .layout { 
-            display: flex; gap: 20px; padding: 20px; flex: 1; overflow: hidden;
-            max-width: 1800px; margin: auto; width: 100%;
-        }
+        .layout { display: grid; grid-template-columns: 1fr 400px; gap: 20px; padding: 20px; max-width: 1600px; margin: auto; }
         
-        /* Estádio e Campo Dinâmico */
-        .estadio-container { 
-            flex: 1; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 15px; 
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.8); overflow-y: auto; position: relative;
-        }
-        
-        /* Custom Scrollbar para o Estádio */
-        .estadio-container::-webkit-scrollbar { width: 12px; }
-        .estadio-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
-        .estadio-container::-webkit-scrollbar-thumb { background: var(--amarelo); border-radius: 10px; }
-
+        /* Campo */
+        .estadio-container { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
         .campo {
-            position: relative; border-radius: 8px; overflow: hidden;
-            border: 5px solid var(--branco); box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            background: repeating-linear-gradient(90deg, var(--verde-claro) 0, var(--verde-claro) 80px, var(--verde-escuro) 80px, var(--verde-escuro) 160px);
-            transition: height 0.5s; min-height: 100%;
+            position: relative; height: 800px; border-radius: 8px; overflow: hidden;
+            border: 6px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.4);
+            background: repeating-linear-gradient(90deg, var(--grama-clara) 0, var(--grama-clara) 100px, var(--grama-escura) 100px, var(--grama-escura) 200px);
         }
+        .campo:before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 6px; background: rgba(255,255,255,0.8); transform: translateX(-50%); }
+        .circulo { position: absolute; left: 50%; top: 50%; width: 200px; height: 200px; border: 6px solid rgba(255,255,255,0.8); border-radius: 50%; transform: translate(-50%, -50%); }
+        .area-gol { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 150px; height: 350px; border: 6px solid rgba(255,255,255,0.8); border-right: none; }
         
-        /* Marcações do Campo */
-        .campo:before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; background: rgba(255,255,255,0.7); transform: translateX(-50%); }
-        .circulo { position: absolute; left: 50%; top: 50vh; width: 150px; height: 150px; border: 5px solid rgba(255,255,255,0.7); border-radius: 50%; transform: translate(-50%, -50%); }
-        
-        .area-gol { 
-            position: absolute; right: 0; top: 0; bottom: 0; width: 120px; 
-            border-left: 5px solid rgba(255,255,255,0.7);
-            background: linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-        }
-        .rede {
-            position: absolute; right: 0; top: 0; bottom: 0; width: 50px;
-            background-image: radial-gradient(#fff 1px, transparent 0), radial-gradient(#fff 1px, transparent 0);
-            background-size: 10px 10px; background-position: 0 0, 5px 5px; opacity: 0.3;
-        }
-        
-        /* Jogadores */
-        .player { position: absolute; transition: left 1.5s cubic-bezier(0.25, 1, 0.5, 1); display: flex; align-items: center; z-index: 10; width: 100%; }
-        .jogador-info { 
-            background: var(--branco); padding: 4px 10px; border-radius: 20px; border: 3px solid var(--azul); 
-            margin-right: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-            min-width: 180px;
-        }
-        .nome { color: var(--azul); font-size: 16px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 120px; }
-        .pts { background: var(--verde); color: var(--branco); padding: 2px 8px; border-radius: 10px; font-weight: 900; }
-        .bola { font-size: 28px; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6)); transition: transform 1.5s; }
-        .bola.girando { transform: rotate(720deg); }
+        /* Jogadores e Avatares */
+        .player { position: absolute; transition: left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; z-index: 10; }
+        .jogador-info { background: rgba(255, 255, 255, 0.95); padding: 6px 12px; border-radius: 30px; border: 3px solid var(--laranja); margin-right: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .avatar-em-campo { font-size: 24px; }
+        .nome { color: var(--azul); font-size: 16px; font-weight: bold; white-space: nowrap; }
+        .pts { background: var(--laranja); color: white; padding: 2px 8px; border-radius: 10px; font-weight: 900; }
+        .bola { font-size: 30px; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6)); }
+        .bola.girando { animation: girarBola 1s linear infinite; }
+        @keyframes girarBola { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
-        /* Sidebar e Controles */
-        .sidebar { 
-            width: 450px; background: var(--branco); border-radius: 15px; padding: 20px; 
-            display: flex; flex-direction: column; box-shadow: -5px 0 30px rgba(0,0,0,0.5);
-        }
-        .scroll-controles { overflow-y: auto; flex: 1; padding-right: 10px; }
-        .scroll-controles::-webkit-scrollbar { width: 8px; }
-        .scroll-controles::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-
-        h3 { color: var(--verde); margin-top: 0; border-bottom: 2px solid var(--amarelo); padding-bottom: 5px; text-transform: uppercase; }
-        input, select { width: 100%; padding: 10px; margin: 5px 0; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; }
-        .linha-add { display: flex; gap: 5px; margin-bottom: 10px; }
-        .linha-add select { width: 70px; font-size: 20px; }
+        /* Sidebar Glassmorphism */
+        .sidebar { background: var(--vidro); border-radius: 15px; padding: 20px; max-height: 850px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        h3 { color: var(--azul); margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
         
-        button { border: none; border-radius: 6px; padding: 8px; margin: 2px; font-weight: bold; color: #fff; background: var(--azul); cursor: pointer; transition: 0.2s; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .linha-add { display: flex; gap: 10px; }
+        .linha-add select { width: 80px; font-size: 24px; padding: 5px; }
+        
+        button { border: none; border-radius: 6px; padding: 8px; margin: 2px; font-weight: bold; color: #fff; background: var(--azul); cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         button:hover { filter: brightness(1.2); transform: scale(1.05); }
-        .btn-add { width: 100%; padding: 12px; background: var(--verde); font-size: 16px; margin-bottom: 10px; color: white; text-transform: uppercase; }
+        .btn-add { width: 100%; padding: 12px; background: #28a745; font-size: 16px; margin-bottom: 10px; }
         
-        .card { background: #f8f9fa; border-left: 5px solid var(--amarelo); border-radius: 8px; padding: 10px; margin-bottom: 10px; border-bottom: 1px solid #ddd; }
-        .card input { margin: 0; width: 50%; padding: 4px; border: none; background: transparent; font-weight: bold; color: var(--azul); }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
-        .btn-group button { flex: 1; min-width: 40px; font-size: 12px; }
-        .btn-var { background: #dc3545; flex-basis: 100%; }
+        /* Cards do Painel e Botões de Ponto */
+        .card { background: #fff; border-left: 5px solid var(--azul); border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card input { margin: 0; width: 60%; padding: 4px; border: none; font-weight: bold; color: var(--azul); font-size: 16px; }
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+        .btn-group button { font-size: 13px; padding: 6px 0; }
+        .btn-var { background: #dc3545; grid-column: span 4; }
 
-        /* Gol Msg */
-        #golMsg { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); color: #fff; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; }
-        .texto-gol { font-size: 10vw; font-weight: 900; color: var(--amarelo); text-shadow: 0 0 20px var(--verde), 0 0 40px var(--azul); animation: pulsaGol 0.3s alternate infinite; margin:0; line-height: 1; }
-        .nome-gol { font-size: 4vw; margin-top: 10px; color: #fff; text-transform: uppercase; text-align: center; }
+        /* Modal de Configurações */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(3px); }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal-content label { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 16px; cursor: pointer; }
+        .btn-fechar { background: #dc3545; width: 100%; padding: 10px; margin-top: 15px; }
+
+        /* Gol */
+        #golMsg { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); color: #fff; flex-direction: column; align-items: center; justify-content: center; z-index: 999; }
+        .texto-gol { font-size: 120px; font-weight: 900; color: #FFD700; text-shadow: 0 0 20px var(--laranja), 0 0 40px #FF0000; animation: pulsaGol 0.3s alternate infinite; }
+        .nome-gol { font-size: 60px; margin-top: 10px; color: #fff; text-transform: uppercase; }
         @keyframes pulsaGol { from { transform: scale(1); } to { transform: scale(1.1); } }
     </style>
 </head>
 <body>
 
-<!-- Tela de Liberação de Áudio (Requisito dos navegadores modernos) -->
-<div id="bloqueioAudio">
-    <h1>🏆 Copa InovAção</h1>
-    <p style="font-size: 20px; margin-bottom: 30px;">Para a torcida e o narrador funcionarem, clique abaixo!</p>
-    <button onclick="iniciarEvento()">▶ INICIAR EVENTO</button>
-</div>
+<!-- Áudios. DICA: Para o Galvão, baixe um arquivo mp3 dele, coloque na mesma pasta deste arquivo e mude o src do audioGolFx para src="galvao.mp3" -->
+<audio id="audioAmbiente" src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Football_crowd_-_cheering_and_chants.ogg" loop preload="auto" volume="0.3"></audio>
+<audio id="audioGolFx" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Cheering_crowd.ogg" preload="auto"></audio>
+<audio id="audioApitoFx" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Referee_Whistle.ogg" preload="auto"></audio>
 
-<!-- Efeitos de Fundo Contínuos -->
-<audio id="audioTorcida" src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Football_crowd_-_cheering_and_chants.ogg" loop preload="auto"></audio>
+<div class="decoracao-fundo" id="festaFundo"></div>
 
 <header>
-    <h1>Lab InovAção - Etapa II da 18ª Semana de Aperfeiçoamento Docente</h1>
+    <h1>🏆 Lab InovAção - Etapa II da 18ª Semana de Aperfeiçoamento Docente</h1>
 </header>
 
 <div class="layout">
@@ -146,28 +108,42 @@
         <div class="campo" id="campo">
             <div class="circulo"></div>
             <div class="area-gol"></div>
-            <div class="rede"></div>
         </div>
     </div>
 
     <div class="sidebar">
-        <h3>Escalação</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin:0; border:none;">Nova Escalação</h3>
+            <button onclick="abrirConfig()" style="background: #555; border-radius: 20px; padding: 6px 12px;">⚙️ Configurações</button>
+        </div>
+        
         <div class="linha-add">
             <select id="avatarNovo">
-                <option value="🇧🇷">🇧🇷</option><option value="🏃">🏃</option><option value="👩‍🏫">👩‍🏫</option>
-                <option value="👨‍🏫">👨‍🏫</option><option value="⚽">⚽</option><option value="⭐">⭐</option>
+                <option value="👤">👤</option><option value="👩‍🏫">👩‍🏫</option><option value="👨‍🏫">👨‍🏫</option>
+                <option value="🤖">🤖</option><option value="👽">👽</option><option value="🐶">🐶</option>
+                <option value="🦁">🦁</option><option value="🦊">🦊</option><option value="🦄">🦄</option>
+                <option value="🚀">🚀</option><option value="💡">💡</option><option value="🔥">🔥</option>
             </select>
-            <input id="nomeNovo" placeholder="Nome (Ex: Equipe 1)">
+            <input id="nomeNovo" placeholder="Nome da Equipe / Jogador">
         </div>
-        <button class="btn-add" onclick="add()">➕ Escalar Participante</button>
-
-        <div style="display: flex; gap: 5px; margin-bottom: 10px;">
-            <button style="flex:1; background: #666;" onclick="narrar('Atenção, vai começar a partida!')">🎙️ Testar Narrador</button>
-            <button style="flex:1; background: var(--azul);" onclick="zerarTudo()">🔄 Zerar Placar</button>
-        </div>
+        <button class="btn-add" onclick="add()">➕ Entrar em Campo</button>
 
         <h3>Controle do Jogo</h3>
-        <div class="scroll-controles" id="controles"></div>
+        <div id="controles"></div>
+    </div>
+</div>
+
+<!-- Modal de Configurações -->
+<div id="configModal" class="modal">
+    <div class="modal-content">
+        <h3 style="text-align: center;">⚙️ Opções do Jogo</h3>
+        <label><input type="checkbox" id="somAmbiente" onchange="toggleAmbiente()"> 🏟️ Torcida de Fundo</label>
+        <label><input type="checkbox" id="somApito" checked> 📢 Som de Apito</label>
+        <label><input type="checkbox" id="somGol" checked> 🎉 Som de GOL</label>
+        <label><input type="checkbox" id="efeitoConfete" checked> 🎊 Explosão de Confetes</label>
+        <hr>
+        <button onclick="zerarTudo()" style="width:100%; background:#ff7f00; margin-bottom:5px;">🔄 Zerar Todos os Pontos</button>
+        <button onclick="fecharConfig()" class="btn-fechar">Fechar</button>
     </div>
 </div>
 
@@ -177,53 +153,41 @@
 </div>
 
 <script>
-let participantes = JSON.parse(localStorage.getItem('copaLabFinal')) || [];
-const audioTorcida = document.getElementById('audioTorcida');
+// Gerador de decorações flutuantes para a festa de fundo
+const fundo = document.getElementById('festaFundo');
+const emojisFesta = ['🇧🇷', '🎉', '⚽', '🏆', '🎈', '✨'];
+for(let i=0; i<30; i++) {
+    let el = document.createElement('div');
+    el.className = 'flutuante';
+    el.innerText = emojisFesta[Math.floor(Math.random() * emojisFesta.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    el.style.animationDelay = (Math.random() * 10) + 's';
+    fundo.appendChild(el);
+}
 
-// --- SÍNTESE DE VOZ (NARRADOR VIRTUAL) ---
-function narrar(texto, tipo = 'normal') {
-    if (!window.speechSynthesis) return;
-    
-    // Cancela falas anteriores para não encavalar
-    window.speechSynthesis.cancel(); 
-    
-    let msg = new SpeechSynthesisUtterance();
-    msg.text = texto;
-    msg.lang = 'pt-BR';
-    
-    // Ajustes para simular narração de futebol
-    if(tipo === 'gol') {
-        msg.rate = 0.8; // Mais lento para prolongar o grito
-        msg.pitch = 1.2;
-        msg.volume = 1;
-    } else {
-        msg.rate = 1.4; // Mais rápido e dinâmico
-        msg.pitch = 1.1;
-        msg.volume = 0.8;
+// Lógica do Jogo
+let participantes = JSON.parse(localStorage.getItem('copaLabAnimada')) || [];
+const audioAmbiente = document.getElementById('audioAmbiente');
+const audioGol = document.getElementById('audioGolFx');
+const audioApito = document.getElementById('audioApitoFx');
+
+// Interação obrigatória para áudio tocar no navegador
+document.body.addEventListener('click', () => {
+    if(document.getElementById('somAmbiente').checked && audioAmbiente.paused) {
+        audioAmbiente.volume = 0.1;
+        audioAmbiente.play().catch(()=>{});
     }
+}, {once:true});
 
-    // Tenta forçar uma voz masculina do Google/Microsoft se disponível
-    let vozes = window.speechSynthesis.getVoices();
-    let vozBR = vozes.find(v => v.lang === 'pt-BR' && (v.name.includes('Google') || v.name.includes('Maria') === false));
-    if(vozBR) msg.voice = vozBR;
+function save() { localStorage.setItem('copaLabAnimada', JSON.stringify(participantes)); }
 
-    window.speechSynthesis.speak(msg);
+function abrirConfig() { document.getElementById('configModal').style.display = 'flex'; }
+function fecharConfig() { document.getElementById('configModal').style.display = 'none'; }
+function toggleAmbiente() {
+    if(document.getElementById('somAmbiente').checked) audioAmbiente.play();
+    else audioAmbiente.pause();
 }
-
-// Carrega as vozes antecipadamente
-window.speechSynthesis.onvoiceschanged = function() { window.speechSynthesis.getVoices(); };
-
-// --- CONTROLE DE ÁUDIO ---
-function iniciarEvento() {
-    document.getElementById('bloqueioAudio').style.display = 'none';
-    audioTorcida.volume = 0.15;
-    audioTorcida.play().catch(e => console.log("Torcida não pôde iniciar"));
-    narrar("Bem vindos ao Lab InovAção! Que comecem os jogos!");
-    render();
-}
-
-// --- LÓGICA DO JOGO ---
-function save() { localStorage.setItem('copaLabFinal', JSON.stringify(participantes)); }
 
 function add() {
     let n = document.getElementById('nomeNovo').value.trim();
@@ -231,7 +195,7 @@ function add() {
     if (!n) return;
     participantes.push({ id: Date.now(), nome: n, avatar: av, pontos: 0 });
     document.getElementById('nomeNovo').value = '';
-    narrar("Novo jogador em campo: " + n);
+    tocarApito();
     render();
 }
 
@@ -239,8 +203,6 @@ function editar(id, v) {
     let p = participantes.find(x => x.id === id);
     if (p) { p.nome = v; save(); render(); }
 }
-
-const frasesPonto = ["Bela jogada do ", "Que passe incrível do ", "Subindo no ataque, "];
 
 function alterar(id, v) {
     let p = participantes.find(x => x.id === id);
@@ -251,17 +213,15 @@ function alterar(id, v) {
     
     if(v > 0) animarBola(id);
 
-    if (p.pontos >= 100 && pontosAnteriores < 100) { 
-        dispararGol(p.nome); 
-    } else if (v > 0) { 
-        // Escolhe uma frase aleatória + o nome do jogador
-        let frase = frasesPonto[Math.floor(Math.random() * frasesPonto.length)] + p.nome;
-        narrar(frase);
-    } else if (v < 0) {
-        narrar("Ih, falta marcada! O VAR tirou pontos do " + p.nome);
-    }
-    
+    if (p.pontos >= 100 && pontosAnteriores < 100) { dispararGol(p.nome); } 
+    else { if(v > 0) tocarApito(); }
     render();
+}
+
+function tocarApito() {
+    if (document.getElementById('somApito').checked) {
+        audioApito.currentTime = 0; audioApito.play().catch(()=>{});
+    }
 }
 
 function dispararGol(nome) {
@@ -269,32 +229,29 @@ function dispararGol(nome) {
     document.getElementById('nomeArtilheiro').innerText = nome;
     m.style.display = 'flex';
     
-    // Grito de gol usando o sintetizador
-    narrar("Goooooooooooooooooooooooooooool! É do " + nome + "!", 'gol');
+    if (document.getElementById('somGol').checked) {
+        audioGol.currentTime = 0; audioGol.play().catch(()=>{});
+    }
     
-    audioTorcida.volume = 0.5; // Aumenta torcida no gol
-    
-    if (typeof confetti === 'function') {
-        let fim = Date.now() + 4000;
+    if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
+        let duracao = 3000; let fim = Date.now() + duracao;
         (function frame() {
-            confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
-            confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
+            confetti({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#005596', '#ff7f00', '#00873E', '#FFCC00'] });
+            confetti({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#005596', '#ff7f00', '#00873E', '#FFCC00'] });
             if (Date.now() < fim) requestAnimationFrame(frame);
         }());
     }
-
-    setTimeout(() => { 
-        m.style.display = 'none'; 
-        audioTorcida.volume = 0.15; // Volta volume normal
-    }, 5000);
+    setTimeout(() => { m.style.display = 'none'; }, 4000);
 }
 
 function animarBola(id) {
-    let bola = document.getElementById(`bola-${id}`);
-    if(bola) {
-        bola.classList.add('girando');
-        setTimeout(() => bola.classList.remove('girando'), 1500);
-    }
+    setTimeout(() => {
+        let bola = document.getElementById(`bola-${id}`);
+        if(bola) {
+            bola.classList.add('girando');
+            setTimeout(() => bola.classList.remove('girando'), 1200);
+        }
+    }, 50);
 }
 
 function excluirP(id) {
@@ -302,56 +259,49 @@ function excluirP(id) {
 }
 
 function zerarTudo() { 
-    if(confirm('Zerar placar?')) { participantes.forEach(p => p.pontos = 0); render(); }
+    if(confirm('Zerar o campeonato todo?')) { participantes.forEach(p => p.pontos = 0); fecharConfig(); render(); }
 }
 
 function render() {
     save();
-    
-    // Ordena do maior pro menor
     let rank = [...participantes].sort((a, b) => b.pontos - a.pontos);
 
-    // Ajusta a altura do campo dependendo da quantidade de jogadores para caber até 40 pessoas
-    let alturaNecessaria = (participantes.length * 60) + 100;
-    let campo = document.getElementById('campo');
-    campo.style.minHeight = Math.max(800, alturaNecessaria) + 'px';
-
-    document.getElementById('controles').innerHTML = rank.map(p => `
+    document.getElementById('controles').innerHTML = participantes.map(p => `
     <div class='card'>
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <span>${p.avatar}</span>
-            <input value="${p.nome}" onchange="editar(${p.id}, this.value)">
-            <strong style="color: var(--verde); font-size: 16px;">${p.pontos} pts</strong>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:5px; width:100%;">
+                <span style="font-size:20px;">${p.avatar}</span>
+                <input value="${p.nome}" onchange="editar(${p.id}, this.value)">
+            </div>
+            <strong style="color: var(--laranja); font-size: 18px; white-space:nowrap;">${p.pontos} pts</strong>
         </div>
         <div class='btn-group'>
-            <button onclick="alterar(${p.id}, 2)">+2</button>
             <button onclick="alterar(${p.id}, 6)">+6</button>
             <button onclick="alterar(${p.id}, 8)">+8</button>
             <button onclick="alterar(${p.id}, 10)">+10</button>
+            <button onclick="alterar(${p.id}, 20)">+20</button>
             <button onclick="alterar(${p.id}, 25)">+25</button>
             <button onclick="alterar(${p.id}, 50)">+50</button>
-            <button style="background:#dc3545;" onclick="excluirP(${p.id})">🗑️</button>
-            <button class="btn-var" onclick="alterar(${p.id}, -10)">VAR (-10)</button>
+            <button style="background:transparent; color:#dc3545; border:1px solid #dc3545" onclick="excluirP(${p.id})">🗑️</button>
+            <button class="btn-var" onclick="alterar(${p.id}, -10)">VAR (-10 pts)</button>
         </div>
     </div>`).join('');
 
+    let campo = document.getElementById('campo');
     campo.querySelectorAll('.player').forEach(e => e.remove());
 
     rank.forEach((p, i) => {
         let d = document.createElement('div');
         d.className = 'player';
-        
-        // Espaçamento dinâmico: 55px por jogador, começando do topo (20px)
-        d.style.top = (20 + i * 55) + 'px';
-        
-        // Posição: 90% é o gol.
-        let progresso = Math.min((p.pontos / 100) * 90, 90);
+        let espacamentoY = rank.length > 8 ? 60 : 90; 
+        d.style.top = (40 + i * espacamentoY) + 'px';
+        let progresso = Math.min((p.pontos / 100) * 88, 88);
         d.style.left = progresso + '%';
         
         d.innerHTML = `
             <div class='jogador-info'>
-                <span>${p.avatar}</span>
-                <span class='nome' title="${p.nome}">${i+1}º ${p.nome}</span>
+                <span class='avatar-em-campo'>${p.avatar}</span>
+                <span class='nome'>${p.nome}</span>
                 <span class='pts'>${p.pontos}</span>
             </div>
             <div class='bola' id='bola-${p.id}'>⚽</div>
@@ -359,6 +309,7 @@ function render() {
         campo.appendChild(d);
     });
 }
+render();
 </script>
 </body>
 </html>
