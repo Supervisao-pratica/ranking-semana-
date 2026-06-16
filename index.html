@@ -35,15 +35,39 @@
         }
         h1 { margin: 0; font-size: 32px; text-transform: uppercase; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
 
-        .layout { display: grid; grid-template-columns: 1fr 400px; gap: 20px; padding: 20px; max-width: 1600px; margin: auto; }
+        .layout {
+    display: grid;
+    grid-template-columns: 1fr 450px;
+    gap: 20px;
+    padding: 20px;
+    max-width: 1800px;
+    margin: auto;
+}
         
-        /* Campo */
-        .estadio-container { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
         .campo {
-            position: relative; height: 800px; border-radius: 8px; overflow: hidden;
-            border: 6px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.4);
-            background: repeating-linear-gradient(90deg, var(--grama-clara) 0, var(--grama-clara) 100px, var(--grama-escura) 100px, var(--grama-escura) 200px);
-        }
+    position: relative;
+    min-height: 3200px;
+    border-radius: 8px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    border: 6px solid #fff;
+
+    box-shadow:
+        0 0 20px rgba(255,255,255,0.4),
+        inset 0 0 40px rgba(0,0,0,0.15);
+
+    background: repeating-linear-gradient(
+        90deg,
+        var(--grama-clara) 0,
+        var(--grama-clara) 100px,
+        var(--grama-escura) 100px,
+        var(--grama-escura) 200px
+    );
+
+    padding-bottom: 120px;
+}
         .campo:before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 6px; background: rgba(255,255,255,0.8); transform: translateX(-50%); }
         .circulo { position: absolute; left: 50%; top: 50%; width: 200px; height: 200px; border: 6px solid rgba(255,255,255,0.8); border-radius: 50%; transform: translate(-50%, -50%); }
         .area-gol { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 150px; height: 350px; border: 6px solid rgba(255,255,255,0.8); border-right: none; }
@@ -59,8 +83,23 @@
         @keyframes girarBola { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
         /* Sidebar Glassmorphism */
-        .sidebar { background: var(--vidro); border-radius: 15px; padding: 20px; max-height: 850px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
-        h3 { color: var(--azul); margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
+.sidebar {
+    background: var(--vidro);
+    border-radius: 15px;
+    padding: 20px;
+    max-height: 95vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    backdrop-filter: blur(10px);
+}
+
+h3 {
+    color: var(--azul);
+    margin-top: 0;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+}
         
         input, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
         .linha-add { display: flex; gap: 10px; }
@@ -288,26 +327,49 @@ function render() {
     </div>`).join('');
 
     let campo = document.getElementById('campo');
-    campo.querySelectorAll('.player').forEach(e => e.remove());
 
-    rank.forEach((p, i) => {
-        let d = document.createElement('div');
-        d.className = 'player';
-        let espacamentoY = rank.length > 8 ? 60 : 90; 
-        d.style.top = (40 + i * espacamentoY) + 'px';
-        let progresso = Math.min((p.pontos / 100) * 88, 88);
-        d.style.left = progresso + '%';
-        
-        d.innerHTML = `
-            <div class='jogador-info'>
-                <span class='avatar-em-campo'>${p.avatar}</span>
-                <span class='nome'>${p.nome}</span>
-                <span class='pts'>${p.pontos}</span>
-            </div>
-            <div class='bola' id='bola-${p.id}'>⚽</div>
-        `;
-        campo.appendChild(d);
-    });
+campo.querySelectorAll('.player').forEach(e => e.remove());
+
+const alturaNecessaria = Math.max(
+    2800,
+    rank.length * 68 + 200
+);
+
+campo.style.height = alturaNecessaria + "px";
+
+rank.forEach((p, i) => {
+
+    let d = document.createElement('div');
+
+    d.className = 'player';
+
+    let espacamentoY = 72;
+
+    d.style.top = (40 + i * espacamentoY) + 'px';
+
+    let progresso = Math.min(
+        (p.pontos / 100) * 88,
+        88
+    );
+
+    d.style.left = progresso + '%';
+
+    d.innerHTML = `
+        <div class='jogador-info'>
+            <span class='avatar-em-campo'>${p.avatar}</span>
+            <span class='nome'>${p.nome}</span>
+            <span class='pts'>${p.pontos}</span>
+        </div>
+
+        <div class='bola' id='bola-${p.id}'>
+            ⚽
+        </div>
+    `;
+
+    campo.appendChild(d);
+
+});
+    
 }
 render();
 </script>
