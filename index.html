@@ -723,259 +723,87 @@
 </div>
 
 <script>
-    // 1. PEGAR OS ELEMENTOS DE ÁUDIO E BOTÃO
-const audioAmbiente = document.getElementById('audioAmbiente');
-const audioGol = document.getElementById('audioGolFx');
-const btnAtivarSom = document.getElementById('ativarSomBtn');
-const checkSomAmbiente = document.getElementById('somAmbiente');
-
-// 2. LIGAR A TORCIDA DE FUNDO (Botão do topo)
-btnAtivarSom.addEventListener('click', () => {
-    audioAmbiente.volume = 0.2; // Volume baixinho de fundo
-    audioAmbiente.play().then(() => {
-        btnAtivarSom.innerText = "🔊 Som do Estádio Ativado!";
-        btnAtivarSom.style.background = "#28a745"; // Fica verde confirmando
-        checkSomAmbiente.checked = true; // Marca a caixinha nas configurações
-    }).catch(erro => {
-        alert("O navegador bloqueou o áudio. Clique novamente!");
-    });
-});
-
-// 3. LIGAR/DESLIGAR TORCIDA NAS CONFIGURAÇÕES
-checkSomAmbiente.addEventListener('change', () => {
-    if (checkSomAmbiente.checked) {
-        audioAmbiente.play();
-    } else {
-        audioAmbiente.pause();
-    }
-});
-
-// 4. FUNÇÃO DO GOL (Substitua a sua função dispararGol por esta)
-function dispararGol(nome) {
-    let m = document.getElementById('golMsg');
-    document.getElementById('nomeArtilheiro').innerText = nome;
-    m.style.display = 'flex';
+    <script>
+    // 1. DADOS E ELEMENTOS DE ÁUDIO
+    let participantes = JSON.parse(localStorage.getItem('copaLabAnimada')) || [];
     
-    // Toca o grito de GOL
-    if (document.getElementById('somGol').checked) {
-        audioGol.currentTime = 0; // Volta o áudio do gol pro começo
-        audioGol.volume = 1.0;    // Coloca no volume máximo
-        audioGol.play();
-    }
-    
-    // Aumenta a vibração da torcida de fundo temporariamente
-    audioAmbiente.volume = 0.6; 
-    
-    // Explosão de confetes (se estiver marcado nas configurações)
-    if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
-        let fim = Date.now() + 4000;
-        (function frame() {
-            confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
-            confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
-            if (Date.now() < fim) requestAnimationFrame(frame);
-        }());
-    }
+    const audioAmbiente = document.getElementById('audioAmbiente');
+    const audioGol = document.getElementById('audioGolFx');
+    const audioApito = document.getElementById('audioApitoFx');
+    const btnAtivarSom = document.getElementById('ativarSomBtn');
+    const checkSomAmbiente = document.getElementById('somAmbiente');
 
-    // Depois de 5 segundos, some a mensagem e abaixa a torcida de novo
-    setTimeout(() => { 
-        m.style.display = 'none'; 
-        audioAmbiente.volume = 0.2; // Volta a torcida pro volume baixinho
-    }, 5000);
-}
-
-/* ===========================
-   DECORAÇÃO DE FUNDO
-=========================== */
-
-const fundo = document.getElementById('festaFundo');
-
-const emojisFesta = [
-    '🇧🇷',
-    '🎉',
-    '⚽',
-    '🏆',
-    '🎈',
-    '✨'
-];
-
-for(let i=0;i<30;i++){
-
-    let el = document.createElement('div');
-
-    el.className = 'flutuante';
-
-    el.innerText =
-        emojisFesta[
-            Math.floor(
-                Math.random()*emojisFesta.length
-            )
-        ];
-
-    el.style.left =
-        Math.random()*100 + 'vw';
-
-    el.style.animationDuration =
-        (Math.random()*10+10)+'s';
-
-    el.style.animationDelay =
-        (Math.random()*10)+'s';
-
-    fundo.appendChild(el);
-}
-
-/* ===========================
-   DADOS
-=========================== */
-
-let participantes =
-    JSON.parse(
-        localStorage.getItem(
-            'copaLabAnimada'
-        )
-    ) || [];
-
-const audioAmbiente =
-    document.getElementById(
-        'audioAmbiente'
-    );
-
-const audioGol =
-    document.getElementById(
-        'audioGolFx'
-    );
-
-const audioApito =
-    document.getElementById(
-        'audioApitoFx'
-    );
-
-/* ===========================
-   BOTÃO DE SOM
-=========================== */
-
-document
-.getElementById('ativarSomBtn')
-.addEventListener('click', () => {
-
-    audioAmbiente.volume = 0.15;
-
-    document.getElementById(
-        'somAmbiente'
-    ).checked = true;
-
-    audioAmbiente.play()
-    .then(() => {
-
-        document.getElementById(
-            'ativarSomBtn'
-        ).innerHTML =
-        '🔊 Sons Ativados';
-
-    })
-    .catch(err => {
-        console.log(err);
+    // 2. LIGAR A TORCIDA DE FUNDO (Botão do topo)
+    btnAtivarSom.addEventListener('click', () => {
+        audioAmbiente.volume = 0.2; // Volume baixinho de fundo
+        audioAmbiente.play().then(() => {
+            btnAtivarSom.innerText = "🔊 Som do Estádio Ativado!";
+            btnAtivarSom.style.background = "#28a745"; // Fica verde confirmando
+            if(checkSomAmbiente) checkSomAmbiente.checked = true; 
+        }).catch(erro => {
+            alert("O navegador bloqueou o áudio. Clique novamente!");
+        });
     });
 
-});
-
-/* ===========================
-   FUNÇÕES
-=========================== */
-
-function save(){
-
-    localStorage.setItem(
-        'copaLabAnimada',
-        JSON.stringify(participantes)
-    );
-
-}
-
-function abrirConfig(){
-    document.getElementById(
-        'configModal'
-    ).style.display = 'flex';
-}
-
-function fecharConfig(){
-    document.getElementById(
-        'configModal'
-    ).style.display = 'none';
-}
-
-function toggleAmbiente(){
-
-    if(
-        document.getElementById(
-            'somAmbiente'
-        ).checked
-    ){
-
-        audioAmbiente.play()
-        .catch(()=>{});
-
-    }else{
-
-        audioAmbiente.pause();
-
+    // 3. LIGAR/DESLIGAR TORCIDA NAS CONFIGURAÇÕES
+    if(checkSomAmbiente) {
+        checkSomAmbiente.addEventListener('change', () => {
+            if (checkSomAmbiente.checked) {
+                audioAmbiente.play();
+            } else {
+                audioAmbiente.pause();
+            }
+        });
     }
 
-}
+    // 4. FUNÇÃO DO GOL (Agora unificada e pronta para gritar alto)
+    function dispararGol(nome) {
+        let m = document.getElementById('golMsg');
+        document.getElementById('nomeArtilheiro').innerText = nome;
+        m.style.display = 'flex';
+        
+        // Toca o grito de GOL
+        if (document.getElementById('somGol').checked) {
+            audioGol.currentTime = 0; // Volta o áudio do gol pro começo
+            audioGol.volume = 1.0;    // Coloca no volume máximo
+            audioGol.play();
+        }
+        
+        // Aumenta a vibração da torcida de fundo temporariamente
+        audioAmbiente.volume = 0.6; 
+        
+        // Explosão de confetes
+        if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
+            let fim = Date.now() + 4000;
+            (function frame() {
+                confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#005596', '#FFCC00', '#00873E'] });
+                confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#005596', '#FFCC00', '#00873E'] });
+                if (Date.now() < fim) requestAnimationFrame(frame);
+            }());
+        }
 
-document
-.getElementById('somAmbiente')
-.addEventListener(
-    'change',
-    toggleAmbiente
-);
-
-function tocarApito(){
-
-    if(
-        document.getElementById(
-            'somApito'
-        ).checked
-    ){
-
-        audioApito.pause();
-
-        audioApito.currentTime = 0;
-
-        audioApito.play()
-        .catch(()=>{});
-
+        // Depois de 5 segundos, some a mensagem e abaixa a torcida de novo
+        setTimeout(() => { 
+            m.style.display = 'none'; 
+            audioAmbiente.volume = 0.2; 
+        }, 5000);
     }
 
-}
+    // 5. DECORAÇÃO DE FUNDO ANIMADA
+    const fundo = document.getElementById('festaFundo');
+    const emojisFesta = ['🇧🇷', '🎉', '⚽', '🏆', '🎈', '✨'];
 
-function add(){
+    for(let i=0; i<30; i++) {
+        let el = document.createElement('div');
+        el.className = 'flutuante';
+        el.innerText = emojisFesta[Math.floor(Math.random() * emojisFesta.length)];
+        el.style.left = Math.random() * 100 + 'vw';
+        el.style.animationDuration = (Math.random() * 10 + 10) + 's';
+        el.style.animationDelay = (Math.random() * 10) + 's';
+        fundo.appendChild(el);
+    }
 
-    let nome =
-        document.getElementById(
-            'nomeNovo'
-        ).value.trim();
-
-    let avatar =
-        document.getElementById(
-            'avatarNovo'
-        ).value;
-
-    if(!nome) return;
-
-    participantes.push({
-        id:Date.now(),
-        nome:nome,
-        avatar:avatar,
-        pontos:0
-    });
-
-    document.getElementById(
-        'nomeNovo'
-    ).value='';
-
-    tocarApito();
-
-    render();
+       render();
 
 }
 
