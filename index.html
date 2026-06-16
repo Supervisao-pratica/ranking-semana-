@@ -3,125 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lab InovAção - Copa do Mundo</title>
+    <title>Lab InovAção - Festa da Copa</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --azul: #005596;
             --laranja: #ff7f00;
-            --grama-clara: #4c9a2a;
-            --grama-escura: #418722;
+            --grama-clara: #3a8220;
+            --grama-escura: #306e18;
+            --vidro: rgba(255, 255, 255, 0.9);
         }
         * { box-sizing: border-box; }
-        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #333; overflow-x: hidden; }
         
-        /* Cabeçalho Painel de LED */
-        header { 
-            background: #0f0f1a; color: #fff; text-align: center; padding: 20px; 
-            border-bottom: 4px solid var(--laranja); box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        /* Fundo Animado de Festa */
+        body { 
+            margin: 0; font-family: 'Segoe UI', Arial, sans-serif; color: #333; overflow-x: hidden;
+            background: linear-gradient(-45deg, #005596, #00873E, #FFCC00, #ff7f00);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
-        h1 { margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--azul); }
-        .meta-txt { color: var(--laranja); font-weight: bold; font-size: 18px; margin-top: 5px; }
+        @keyframes gradientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
 
-        .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; padding: 20px; max-width: 1600px; margin: auto; }
+        /* Elementos flutuantes (Bandeiras) */
+        .decoracao-fundo { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -1; overflow: hidden; opacity: 0.6; }
+        .flutuante { position: absolute; font-size: 30px; animation: subir linear infinite; bottom: -50px; }
+        @keyframes subir { to { transform: translateY(-110vh) rotate(360deg); } }
+
+        header { 
+            background: rgba(0, 0, 0, 0.6); color: #fff; text-align: center; padding: 15px; 
+            border-bottom: 4px solid var(--laranja); backdrop-filter: blur(5px);
+        }
+        h1 { margin: 0; font-size: 32px; text-transform: uppercase; text-shadow: 2px 2px 5px rgba(0,0,0,0.8); }
+
+        .layout { display: grid; grid-template-columns: 1fr 400px; gap: 20px; padding: 20px; max-width: 1600px; margin: auto; }
         
-        /* O Campo Realista */
-        .estadio-container { background: #222; padding: 15px; border-radius: 15px; box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5); }
+        /* Campo */
+        .estadio-container { background: rgba(0,0,0,0.5); padding: 15px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
         .campo {
             position: relative; height: 800px; border-radius: 8px; overflow: hidden;
-            border: 6px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            border: 6px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.4);
             background: repeating-linear-gradient(90deg, var(--grama-clara) 0, var(--grama-clara) 100px, var(--grama-escura) 100px, var(--grama-escura) 200px);
         }
-        
-        /* Linhas do Campo */
         .campo:before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 6px; background: rgba(255,255,255,0.8); transform: translateX(-50%); }
         .circulo { position: absolute; left: 50%; top: 50%; width: 200px; height: 200px; border: 6px solid rgba(255,255,255,0.8); border-radius: 50%; transform: translate(-50%, -50%); }
-        .ponto-central { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; background: rgba(255,255,255,0.8); border-radius: 50%; transform: translate(-50%, -50%); }
         .area-gol { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 150px; height: 350px; border: 6px solid rgba(255,255,255,0.8); border-right: none; }
-        .pequena-area { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 60px; height: 160px; border: 6px solid rgba(255,255,255,0.8); border-right: none; }
-        .meia-lua { position: absolute; right: 150px; top: 50%; transform: translateY(-50%); width: 80px; height: 160px; border: 6px solid rgba(255,255,255,0.8); border-radius: 100px 0 0 100px; border-right: none; }
         
-        /* Jogadores */
+        /* Jogadores e Avatares */
         .player { position: absolute; transition: left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; z-index: 10; }
-        .jogador-info { background: rgba(0, 0, 0, 0.7); padding: 4px 10px; border-radius: 20px; border: 2px solid var(--laranja); margin-right: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .nome { color: #fff; font-size: 14px; font-weight: bold; white-space: nowrap; }
-        .pts { color: var(--laranja); font-size: 16px; font-weight: 900; }
-        .bola { font-size: 38px; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6)); }
+        .jogador-info { background: rgba(255, 255, 255, 0.95); padding: 6px 12px; border-radius: 30px; border: 3px solid var(--laranja); margin-right: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .avatar-em-campo { font-size: 24px; }
+        .nome { color: var(--azul); font-size: 16px; font-weight: bold; white-space: nowrap; }
+        .pts { background: var(--laranja); color: white; padding: 2px 8px; border-radius: 10px; font-weight: 900; }
+        .bola { font-size: 30px; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6)); }
         .bola.girando { animation: girarBola 1s linear infinite; }
         @keyframes girarBola { from { transform: rotate(0); } to { transform: rotate(360deg); } }
 
         /* Sidebar Glassmorphism */
-        .sidebar { background: rgba(255, 255, 255, 0.95); border-radius: 15px; padding: 25px; max-height: 850px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
-        h3 { color: var(--azul); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .sidebar { background: var(--vidro); border-radius: 15px; padding: 20px; max-height: 850px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        h3 { color: var(--azul); margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 5px; }
         
-        /* Controles */
-        input { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
-        button { border: none; border-radius: 8px; padding: 8px 12px; margin: 3px; font-weight: bold; color: #fff; background: var(--azul); cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
-        button:active { transform: translateY(0); }
-        .btn-add { width: 100%; padding: 12px; background: #28a745; font-size: 16px; margin-bottom: 20px; }
-        .laranja { background: var(--laranja); }
-        .perigo { background: #dc3545; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .linha-add { display: flex; gap: 10px; }
+        .linha-add select { width: 80px; font-size: 24px; padding: 5px; }
         
-        /* Cards do Painel */
-        .card { background: #f8f9fa; border-left: 5px solid var(--azul); border-radius: 8px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .card input { margin: 0; width: 60%; padding: 6px; border: none; background: transparent; font-weight: bold; color: var(--azul); font-size: 16px; }
-        .card input:focus { background: #fff; border-bottom: 1px solid var(--azul); outline: none; }
-        .btn-group { display: flex; flex-wrap: wrap; gap: 5px; }
-        .btn-group button { flex: 1; padding: 10px 0; font-size: 14px; }
+        button { border: none; border-radius: 6px; padding: 8px; margin: 2px; font-weight: bold; color: #fff; background: var(--azul); cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        button:hover { filter: brightness(1.2); transform: scale(1.05); }
+        .btn-add { width: 100%; padding: 12px; background: #28a745; font-size: 16px; margin-bottom: 10px; }
+        
+        /* Cards do Painel e Botões de Ponto */
+        .card { background: #fff; border-left: 5px solid var(--azul); border-radius: 8px; padding: 10px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .card input { margin: 0; width: 60%; padding: 4px; border: none; font-weight: bold; color: var(--azul); font-size: 16px; }
+        .btn-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 8px; }
+        .btn-group button { font-size: 13px; padding: 6px 0; }
+        .btn-var { background: #dc3545; grid-column: span 4; }
 
-        /* Efeito de Gol */
-        #golMsg {
-            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); color: #fff; 
-            flex-direction: column; align-items: center; justify-content: center; z-index: 999;
-        }
-        .texto-gol { font-size: 100px; font-weight: 900; color: #FFD700; text-shadow: 0 0 20px var(--laranja), 0 0 40px #FF0000; animation: pulsaGol 0.5s alternate infinite; margin: 0; }
-        .nome-gol { font-size: 50px; margin-top: 10px; color: #fff; text-transform: uppercase; }
+        /* Modal de Configurações */
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(3px); }
+        .modal-content { background: white; padding: 25px; border-radius: 15px; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .modal-content label { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 16px; cursor: pointer; }
+        .btn-fechar { background: #dc3545; width: 100%; padding: 10px; margin-top: 15px; }
+
+        /* Gol */
+        #golMsg { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); color: #fff; flex-direction: column; align-items: center; justify-content: center; z-index: 999; }
+        .texto-gol { font-size: 120px; font-weight: 900; color: #FFD700; text-shadow: 0 0 20px var(--laranja), 0 0 40px #FF0000; animation: pulsaGol 0.3s alternate infinite; }
+        .nome-gol { font-size: 60px; margin-top: 10px; color: #fff; text-transform: uppercase; }
         @keyframes pulsaGol { from { transform: scale(1); } to { transform: scale(1.1); } }
-
-        /* Efeito Torcida */
-        .ambient-controls { background: #eef2f5; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
-        .ambient-controls label { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
+<!-- Áudios. DICA: Para o Galvão, baixe um arquivo mp3 dele, coloque na mesma pasta deste arquivo e mude o src do audioGolFx para src="galvao.mp3" -->
+<audio id="audioAmbiente" src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Football_crowd_-_cheering_and_chants.ogg" loop preload="auto" volume="0.3"></audio>
+<audio id="audioGolFx" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Cheering_crowd.ogg" preload="auto"></audio>
+<audio id="audioApitoFx" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Referee_Whistle.ogg" preload="auto"></audio>
+
+<div class="decoracao-fundo" id="festaFundo"></div>
+
 <header>
-    <h1>🏆 Lab InovAção - O Jogo</h1>
-    <div class="meta-txt">Rumo aos 100 pontos!</div>
+    <h1>🏆 Lab InovAção - A Grande Final</h1>
 </header>
 
 <div class="layout">
     <div class="estadio-container">
         <div class="campo" id="campo">
             <div class="circulo"></div>
-            <div class="ponto-central"></div>
-            <div class="meia-lua"></div>
             <div class="area-gol"></div>
-            <div class="pequena-area"></div>
         </div>
     </div>
 
     <div class="sidebar">
-        <h3>Nova Escalação</h3>
-        <input id="nomeNovo" placeholder="Nome do Participante / Equipe">
-        <button class="btn-add" onclick="add()">➕ Escalar Participante</button>
-
-        <h3>Efeitos Especiais</h3>
-        <div class="ambient-controls">
-            <label><input type="checkbox" id="somApito" checked> 📢 Apito do Árbitro</label>
-            <label><input type="checkbox" id="somGol" checked> 🎉 Vibração da Torcida no Gol</label>
-            <label><input type="checkbox" id="efeitoConfete" checked> 🎊 Efeito de Confetes</label>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin:0; border:none;">Nova Escalação</h3>
+            <button onclick="abrirConfig()" style="background: #555; border-radius: 20px; padding: 6px 12px;">⚙️ Configurações</button>
         </div>
-
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button style="flex: 1;" onclick="zerarTudo()">🔄 Zerar Placar</button>
-            <button style="flex: 1;" class="perigo" onclick="removerTodos()">🗑️ Excluir Todos</button>
+        
+        <div class="linha-add">
+            <select id="avatarNovo">
+                <option value="👤">👤</option><option value="👩‍🏫">👩‍🏫</option><option value="👨‍🏫">👨‍🏫</option>
+                <option value="🤖">🤖</option><option value="👽">👽</option><option value="🐶">🐶</option>
+                <option value="🦁">🦁</option><option value="🦊">🦊</option><option value="🦄">🦄</option>
+                <option value="🚀">🚀</option><option value="💡">💡</option><option value="🔥">🔥</option>
+            </select>
+            <input id="nomeNovo" placeholder="Nome da Equipe / Jogador">
         </div>
+        <button class="btn-add" onclick="add()">➕ Entrar em Campo</button>
 
         <h3>Controle do Jogo</h3>
         <div id="controles"></div>
+    </div>
+</div>
+
+<!-- Modal de Configurações -->
+<div id="configModal" class="modal">
+    <div class="modal-content">
+        <h3 style="text-align: center;">⚙️ Opções do Jogo</h3>
+        <label><input type="checkbox" id="somAmbiente" onchange="toggleAmbiente()"> 🏟️ Torcida de Fundo</label>
+        <label><input type="checkbox" id="somApito" checked> 📢 Som de Apito</label>
+        <label><input type="checkbox" id="somGol" checked> 🎉 Som de GOL</label>
+        <label><input type="checkbox" id="efeitoConfete" checked> 🎊 Explosão de Confetes</label>
+        <hr>
+        <button onclick="zerarTudo()" style="width:100%; background:#ff7f00; margin-bottom:5px;">🔄 Zerar Todos os Pontos</button>
+        <button onclick="fecharConfig()" class="btn-fechar">Fechar</button>
     </div>
 </div>
 
@@ -130,31 +152,48 @@
     <div class="nome-gol" id="nomeArtilheiro">Equipe</div>
 </div>
 
-<audio id="audioGolFx" src="https://www.soundjay.com/human/sounds/crowd-cheering-1.mp3" preload="auto"></audio>
-<audio id="audioApitoFx" src="https://www.soundjay.com/misc/sounds/referee-whistle-1.mp3" preload="auto"></audio>
-
 <script>
-// Inicializando com alguns dados se estiver vazio para dar um "Gostinho" logo de cara
-let dadosIniciais = [
-    { id: 1, nome: "Carlos", pontos: 20 },
-    { id: 2, nome: "Kleber", pontos: 40 },
-    { id: 3, nome: "Bruna Baldan", pontos: 70 }
-];
-
-let participantes = JSON.parse(localStorage.getItem('copaLabInovacao'));
-if (!participantes || participantes.length === 0) {
-    participantes = dadosIniciais;
+// Gerador de decorações flutuantes para a festa de fundo
+const fundo = document.getElementById('festaFundo');
+const emojisFesta = ['🇧🇷', '🎉', '⚽', '🏆', '🎈', '✨'];
+for(let i=0; i<30; i++) {
+    let el = document.createElement('div');
+    el.className = 'flutuante';
+    el.innerText = emojisFesta[Math.floor(Math.random() * emojisFesta.length)];
+    el.style.left = Math.random() * 100 + 'vw';
+    el.style.animationDuration = (Math.random() * 10 + 10) + 's';
+    el.style.animationDelay = (Math.random() * 10) + 's';
+    fundo.appendChild(el);
 }
 
+// Lógica do Jogo
+let participantes = JSON.parse(localStorage.getItem('copaLabAnimada')) || [];
+const audioAmbiente = document.getElementById('audioAmbiente');
 const audioGol = document.getElementById('audioGolFx');
 const audioApito = document.getElementById('audioApitoFx');
 
-function save() { localStorage.setItem('copaLabInovacao', JSON.stringify(participantes)); }
+// Interação obrigatória para áudio tocar no navegador
+document.body.addEventListener('click', () => {
+    if(document.getElementById('somAmbiente').checked && audioAmbiente.paused) {
+        audioAmbiente.volume = 0.1;
+        audioAmbiente.play().catch(()=>{});
+    }
+}, {once:true});
+
+function save() { localStorage.setItem('copaLabAnimada', JSON.stringify(participantes)); }
+
+function abrirConfig() { document.getElementById('configModal').style.display = 'flex'; }
+function fecharConfig() { document.getElementById('configModal').style.display = 'none'; }
+function toggleAmbiente() {
+    if(document.getElementById('somAmbiente').checked) audioAmbiente.play();
+    else audioAmbiente.pause();
+}
 
 function add() {
     let n = document.getElementById('nomeNovo').value.trim();
+    let av = document.getElementById('avatarNovo').value;
     if (!n) return;
-    participantes.push({ id: Date.now(), nome: n, pontos: 0 });
+    participantes.push({ id: Date.now(), nome: n, avatar: av, pontos: 0 });
     document.getElementById('nomeNovo').value = '';
     tocarApito();
     render();
@@ -172,48 +211,16 @@ function alterar(id, v) {
     let pontosAnteriores = p.pontos;
     p.pontos = Math.max(0, p.pontos + v);
     
-    // Anima a bola girando se ganhou pontos
     if(v > 0) animarBola(id);
 
-    if (p.pontos >= 100 && pontosAnteriores < 100) {
-        dispararGol(p.nome);
-    } else {
-        if(v > 0) tocarApito(); // Apita a cada jogada normal
-    }
+    if (p.pontos >= 100 && pontosAnteriores < 100) { dispararGol(p.nome); } 
+    else { if(v > 0) tocarApito(); }
     render();
 }
 
-function excluirP(id) {
-    if(confirm('Expulsar jogador de campo?')) {
-        participantes = participantes.filter(x => x.id !== id);
-        render();
-    }
-}
-
-function zerarP(id) {
-    let p = participantes.find(x => x.id === id);
-    if (p) { p.pontos = 0; render(); }
-}
-
-function zerarTudo() { 
-    if(confirm('Tem certeza que deseja zerar os pontos de todos?')) {
-        participantes.forEach(p => p.pontos = 0); 
-        render(); 
-    }
-}
-
-function removerTodos() { 
-    if(confirm('Encerrar partida e remover todos os times?')) { 
-        participantes = []; 
-        render(); 
-    }
-}
-
-// EFEITOS
 function tocarApito() {
     if (document.getElementById('somApito').checked) {
-        audioApito.currentTime = 0;
-        audioApito.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+        audioApito.currentTime = 0; audioApito.play().catch(()=>{});
     }
 }
 
@@ -223,20 +230,17 @@ function dispararGol(nome) {
     m.style.display = 'flex';
     
     if (document.getElementById('somGol').checked) {
-        audioGol.currentTime = 0;
-        audioGol.play().catch(e => console.log("Áudio bloqueado"));
+        audioGol.currentTime = 0; audioGol.play().catch(()=>{});
     }
     
     if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
-        var duration = 3000;
-        var end = Date.now() + duration;
+        let duracao = 3000; let fim = Date.now() + duracao;
         (function frame() {
-            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#005596', '#ff7f00'] });
-            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#005596', '#ff7f00'] });
-            if (Date.now() < end) { requestAnimationFrame(frame); }
+            confetti({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#005596', '#ff7f00', '#00873E', '#FFCC00'] });
+            confetti({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#005596', '#ff7f00', '#00873E', '#FFCC00'] });
+            if (Date.now() < fim) requestAnimationFrame(frame);
         }());
     }
-
     setTimeout(() => { m.style.display = 'none'; }, 4000);
 }
 
@@ -247,7 +251,15 @@ function animarBola(id) {
             bola.classList.add('girando');
             setTimeout(() => bola.classList.remove('girando'), 1200);
         }
-    }, 100);
+    }, 50);
+}
+
+function excluirP(id) {
+    if(confirm('Expulsar jogador?')) { participantes = participantes.filter(x => x.id !== id); render(); }
+}
+
+function zerarTudo() { 
+    if(confirm('Zerar o campeonato todo?')) { participantes.forEach(p => p.pontos = 0); fecharConfig(); render(); }
 }
 
 function render() {
@@ -256,19 +268,22 @@ function render() {
 
     document.getElementById('controles').innerHTML = participantes.map(p => `
     <div class='card'>
-        <div class='card-header'>
-            <input value="${p.nome}" onchange="editar(${p.id}, this.value)">
-            <strong style="color: var(--laranja); font-size: 18px;">${p.pontos} pts</strong>
+        <div style="display:flex; align-items:center; justify-content:space-between;">
+            <div style="display:flex; align-items:center; gap:5px; width:100%;">
+                <span style="font-size:20px;">${p.avatar}</span>
+                <input value="${p.nome}" onchange="editar(${p.id}, this.value)">
+            </div>
+            <strong style="color: var(--laranja); font-size: 18px; white-space:nowrap;">${p.pontos} pts</strong>
         </div>
         <div class='btn-group'>
+            <button onclick="alterar(${p.id}, 6)">+6</button>
+            <button onclick="alterar(${p.id}, 8)">+8</button>
             <button onclick="alterar(${p.id}, 10)">+10</button>
             <button onclick="alterar(${p.id}, 20)">+20</button>
+            <button onclick="alterar(${p.id}, 25)">+25</button>
             <button onclick="alterar(${p.id}, 50)">+50</button>
-            <button class="laranja" onclick="alterar(${p.id}, -10)">VAR (-10)</button>
-        </div>
-        <div style="margin-top: 5px; text-align: right;">
-            <button style="background: transparent; border: 1px solid #ccc; color: #666;" onclick="zerarP(${p.id})">🔄 Zerar</button>
-            <button style="background: transparent; border: 1px solid #dc3545; color: #dc3545;" onclick="excluirP(${p.id})">🗑️ Expulsar</button>
+            <button style="background:transparent; color:#dc3545; border:1px solid #dc3545" onclick="excluirP(${p.id})">🗑️</button>
+            <button class="btn-var" onclick="alterar(${p.id}, -10)">VAR (-10 pts)</button>
         </div>
     </div>`).join('');
 
@@ -278,17 +293,15 @@ function render() {
     rank.forEach((p, i) => {
         let d = document.createElement('div');
         d.className = 'player';
-        // Distribui os jogadores no campo dependendo de quantos são
         let espacamentoY = rank.length > 8 ? 60 : 90; 
         d.style.top = (40 + i * espacamentoY) + 'px';
-        
-        // Calcula a posição (máximo 88% para não sair do campo e entrar direto no gol)
         let progresso = Math.min((p.pontos / 100) * 88, 88);
         d.style.left = progresso + '%';
         
         d.innerHTML = `
             <div class='jogador-info'>
-                <span class='nome'>${i+1}º ${p.nome}</span>
+                <span class='avatar-em-campo'>${p.avatar}</span>
+                <span class='nome'>${p.nome}</span>
                 <span class='pts'>${p.pontos}</span>
             </div>
             <div class='bola' id='bola-${p.id}'>⚽</div>
@@ -296,8 +309,6 @@ function render() {
         campo.appendChild(d);
     });
 }
-
-// Render inicial
 render();
 </script>
 </body>
