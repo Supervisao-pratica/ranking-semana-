@@ -549,58 +549,171 @@
 
 <body>
 
-<!-- Áudios. DICA: Para o Galvão, baixe um arquivo mp3 dele, coloque na mesma pasta deste arquivo e mude o src do audioGolFx para src="galvao.mp3" -->
-<audio id="audioAmbiente" src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Football_crowd_-_cheering_and_chants.ogg" loop preload="auto" volume="0.3"></audio>
-<audio id="audioGolFx" src="https://upload.wikimedia.org/wikipedia/commons/2/23/Cheering_crowd.ogg" preload="auto"></audio>
-<audio id="audioApitoFx" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Referee_Whistle.ogg" preload="auto"></audio>
+<!-- Áudios -->
+<audio id="audioAmbiente"
+       src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Football_crowd_-_cheering_and_chants.ogg"
+       loop
+       preload="auto">
+</audio>
+
+<audio id="audioGolFx"
+       src="https://upload.wikimedia.org/wikipedia/commons/2/23/Cheering_crowd.ogg"
+       preload="auto">
+</audio>
+
+<audio id="audioApitoFx"
+       src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Referee_Whistle.ogg"
+       preload="auto">
+</audio>
 
 <div class="decoracao-fundo" id="festaFundo"></div>
 
 <header>
-    <h1>🏆 Lab InovAção - Etapa II da 18ª Semana de Aperfeiçoamento Docente</h1>
+
+    <h1>
+        🏆 Lab InovAção - Etapa II da 18ª Semana de Aperfeiçoamento Docente
+    </h1>
+
+    <button id="ativarSomBtn">
+        🔊 Ativar Sons do Estádio
+    </button>
+
 </header>
 
 <div class="layout">
+
     <div class="estadio-container">
+
         <div class="campo" id="campo">
+
             <div class="circulo"></div>
+
             <div class="area-gol"></div>
+
         </div>
+
     </div>
 
     <div class="sidebar">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin:0; border:none;">Nova Escalação</h3>
-            <button onclick="abrirConfig()" style="background: #555; border-radius: 20px; padding: 6px 12px;">⚙️ Configurações</button>
+
+        <div
+            style="
+                display:flex;
+                justify-content:space-between;
+                align-items:center;
+                margin-bottom:15px;
+            "
+        >
+
+            <h3 style="margin:0;border:none;">
+                Nova Escalação
+            </h3>
+
+            <button
+                onclick="abrirConfig()"
+                style="
+                    background:#555;
+                    border-radius:20px;
+                    padding:6px 12px;
+                "
+            >
+                ⚙️ Configurações
+            </button>
+
         </div>
-        
+
         <div class="linha-add">
+
             <select id="avatarNovo">
-                <option value="👤">👤</option><option value="👩‍🏫">👩‍🏫</option><option value="👨‍🏫">👨‍🏫</option>
-                <option value="🤖">🤖</option><option value="👽">👽</option><option value="🐶">🐶</option>
-                <option value="🦁">🦁</option><option value="🦊">🦊</option><option value="🦄">🦄</option>
-                <option value="🚀">🚀</option><option value="💡">💡</option><option value="🔥">🔥</option>
+
+                <option value="👤">👤</option>
+                <option value="👩‍🏫">👩‍🏫</option>
+                <option value="👨‍🏫">👨‍🏫</option>
+
+                <option value="🤖">🤖</option>
+                <option value="👽">👽</option>
+
+                <option value="🐶">🐶</option>
+                <option value="🦁">🦁</option>
+                <option value="🦊">🦊</option>
+                <option value="🦄">🦄</option>
+
+                <option value="🚀">🚀</option>
+                <option value="💡">💡</option>
+                <option value="🔥">🔥</option>
+
             </select>
-            <input id="nomeNovo" placeholder="Nome da Equipe / Jogador">
+
+            <input
+                id="nomeNovo"
+                placeholder="Nome da Equipe / Jogador"
+            >
+
         </div>
-        <button class="btn-add" onclick="add()">➕ Entrar em Campo</button>
+
+        <button
+            class="btn-add"
+            onclick="add()"
+        >
+            ➕ Entrar em Campo
+        </button>
 
         <h3>Controle do Jogo</h3>
+
         <div id="controles"></div>
+
     </div>
+
 </div>
 
 <!-- Modal de Configurações -->
 <div id="configModal" class="modal">
     <div class="modal-content">
-        <h3 style="text-align: center;">⚙️ Opções do Jogo</h3>
-        <label><input type="checkbox" id="somAmbiente" onchange="toggleAmbiente()"> 🏟️ Torcida de Fundo</label>
-        <label><input type="checkbox" id="somApito" checked> 📢 Som de Apito</label>
-        <label><input type="checkbox" id="somGol" checked> 🎉 Som de GOL</label>
-        <label><input type="checkbox" id="efeitoConfete" checked> 🎊 Explosão de Confetes</label>
+
+        <h3 style="text-align:center;">
+            ⚙️ Opções do Jogo
+        </h3>
+
+        <label>
+            <input type="checkbox" id="somAmbiente">
+            🏟️ Torcida de Fundo
+        </label>
+
+        <label>
+            <input type="checkbox" id="somApito" checked>
+            📢 Som de Apito
+        </label>
+
+        <label>
+            <input type="checkbox" id="somGol" checked>
+            🎉 Som de GOL
+        </label>
+
+        <label>
+            <input type="checkbox" id="efeitoConfete" checked>
+            🎊 Explosão de Confetes
+        </label>
+
         <hr>
-        <button onclick="zerarTudo()" style="width:100%; background:#ff7f00; margin-bottom:5px;">🔄 Zerar Todos os Pontos</button>
-        <button onclick="fecharConfig()" class="btn-fechar">Fechar</button>
+
+        <button
+            onclick="zerarTudo()"
+            style="width:100%;background:#ff7f00;margin-bottom:5px;">
+            🔄 Zerar Todos os Pontos
+        </button>
+
+        <button
+            onclick="limparParticipantes()"
+            style="width:100%;background:#dc3545;margin-bottom:5px;">
+            🗑️ Remover Todos os Participantes
+        </button>
+
+        <button
+            onclick="fecharConfig()"
+            class="btn-fechar">
+            Fechar
+        </button>
+
     </div>
 </div>
 
@@ -610,113 +723,398 @@
 </div>
 
 <script>
-// Gerador de decorações flutuantes para a festa de fundo
+
+/* ===========================
+   DECORAÇÃO DE FUNDO
+=========================== */
+
 const fundo = document.getElementById('festaFundo');
-const emojisFesta = ['🇧🇷', '🎉', '⚽', '🏆', '🎈', '✨'];
-for(let i=0; i<30; i++) {
+
+const emojisFesta = [
+    '🇧🇷',
+    '🎉',
+    '⚽',
+    '🏆',
+    '🎈',
+    '✨'
+];
+
+for(let i=0;i<30;i++){
+
     let el = document.createElement('div');
+
     el.className = 'flutuante';
-    el.innerText = emojisFesta[Math.floor(Math.random() * emojisFesta.length)];
-    el.style.left = Math.random() * 100 + 'vw';
-    el.style.animationDuration = (Math.random() * 10 + 10) + 's';
-    el.style.animationDelay = (Math.random() * 10) + 's';
+
+    el.innerText =
+        emojisFesta[
+            Math.floor(
+                Math.random()*emojisFesta.length
+            )
+        ];
+
+    el.style.left =
+        Math.random()*100 + 'vw';
+
+    el.style.animationDuration =
+        (Math.random()*10+10)+'s';
+
+    el.style.animationDelay =
+        (Math.random()*10)+'s';
+
     fundo.appendChild(el);
 }
 
-// Lógica do Jogo
-let participantes = JSON.parse(localStorage.getItem('copaLabAnimada')) || [];
-const audioAmbiente = document.getElementById('audioAmbiente');
-const audioGol = document.getElementById('audioGolFx');
-const audioApito = document.getElementById('audioApitoFx');
+/* ===========================
+   DADOS
+=========================== */
 
-// Interação obrigatória para áudio tocar no navegador
-document.body.addEventListener('click', () => {
-    if(document.getElementById('somAmbiente').checked && audioAmbiente.paused) {
-        audioAmbiente.volume = 0.1;
-        audioAmbiente.play().catch(()=>{});
-    }
-}, {once:true});
+let participantes =
+    JSON.parse(
+        localStorage.getItem(
+            'copaLabAnimada'
+        )
+    ) || [];
 
-function save() { localStorage.setItem('copaLabAnimada', JSON.stringify(participantes)); }
+const audioAmbiente =
+    document.getElementById(
+        'audioAmbiente'
+    );
 
-function abrirConfig() { document.getElementById('configModal').style.display = 'flex'; }
-function fecharConfig() { document.getElementById('configModal').style.display = 'none'; }
-function toggleAmbiente() {
-    if(document.getElementById('somAmbiente').checked) audioAmbiente.play();
-    else audioAmbiente.pause();
+const audioGol =
+    document.getElementById(
+        'audioGolFx'
+    );
+
+const audioApito =
+    document.getElementById(
+        'audioApitoFx'
+    );
+
+/* ===========================
+   BOTÃO DE SOM
+=========================== */
+
+document
+.getElementById('ativarSomBtn')
+.addEventListener('click', () => {
+
+    audioAmbiente.volume = 0.15;
+
+    document.getElementById(
+        'somAmbiente'
+    ).checked = true;
+
+    audioAmbiente.play()
+    .then(() => {
+
+        document.getElementById(
+            'ativarSomBtn'
+        ).innerHTML =
+        '🔊 Sons Ativados';
+
+    })
+    .catch(err => {
+        console.log(err);
+    });
+
+});
+
+/* ===========================
+   FUNÇÕES
+=========================== */
+
+function save(){
+
+    localStorage.setItem(
+        'copaLabAnimada',
+        JSON.stringify(participantes)
+    );
+
 }
 
-function add() {
-    let n = document.getElementById('nomeNovo').value.trim();
-    let av = document.getElementById('avatarNovo').value;
-    if (!n) return;
-    participantes.push({ id: Date.now(), nome: n, avatar: av, pontos: 0 });
-    document.getElementById('nomeNovo').value = '';
+function abrirConfig(){
+    document.getElementById(
+        'configModal'
+    ).style.display = 'flex';
+}
+
+function fecharConfig(){
+    document.getElementById(
+        'configModal'
+    ).style.display = 'none';
+}
+
+function toggleAmbiente(){
+
+    if(
+        document.getElementById(
+            'somAmbiente'
+        ).checked
+    ){
+
+        audioAmbiente.play()
+        .catch(()=>{});
+
+    }else{
+
+        audioAmbiente.pause();
+
+    }
+
+}
+
+document
+.getElementById('somAmbiente')
+.addEventListener(
+    'change',
+    toggleAmbiente
+);
+
+function tocarApito(){
+
+    if(
+        document.getElementById(
+            'somApito'
+        ).checked
+    ){
+
+        audioApito.pause();
+
+        audioApito.currentTime = 0;
+
+        audioApito.play()
+        .catch(()=>{});
+
+    }
+
+}
+
+function add(){
+
+    let nome =
+        document.getElementById(
+            'nomeNovo'
+        ).value.trim();
+
+    let avatar =
+        document.getElementById(
+            'avatarNovo'
+        ).value;
+
+    if(!nome) return;
+
+    participantes.push({
+        id:Date.now(),
+        nome:nome,
+        avatar:avatar,
+        pontos:0
+    });
+
+    document.getElementById(
+        'nomeNovo'
+    ).value='';
+
     tocarApito();
+
     render();
+
 }
 
-function editar(id, v) {
-    let p = participantes.find(x => x.id === id);
-    if (p) { p.nome = v; save(); render(); }
+function editar(id,valor){
+
+    let p =
+        participantes.find(
+            x => x.id === id
+        );
+
+    if(p){
+
+        p.nome = valor;
+
+        save();
+
+        render();
+
+    }
+
 }
 
-function alterar(id, v) {
-    let p = participantes.find(x => x.id === id);
-    if (!p) return;
-    
-    let pontosAnteriores = p.pontos;
-    p.pontos = Math.max(0, p.pontos + v);
-    
-    if(v > 0) animarBola(id);
+function alterar(id,valor){
 
-    if (p.pontos >= 100 && pontosAnteriores < 100) { dispararGol(p.nome); } 
-    else { if(v > 0) tocarApito(); }
+    let p =
+        participantes.find(
+            x => x.id === id
+        );
+
+    if(!p) return;
+
+    let anterior =
+        p.pontos;
+
+    p.pontos =
+        Math.max(
+            0,
+            p.pontos + valor
+        );
+
+    if(valor > 0)
+        animarBola(id);
+
+    if(
+        p.pontos >= 100 &&
+        anterior < 100
+    ){
+
+        dispararGol(
+            p.nome
+        );
+
+    }else{
+
+        if(valor > 0)
+            tocarApito();
+
+    }
+
     render();
+
 }
 
-function tocarApito() {
-    if (document.getElementById('somApito').checked) {
-        audioApito.currentTime = 0; audioApito.play().catch(()=>{});
-    }
-}
+function dispararGol(nome){
 
-function dispararGol(nome) {
-    let m = document.getElementById('golMsg');
-    document.getElementById('nomeArtilheiro').innerText = nome;
-    m.style.display = 'flex';
-    
-    if (document.getElementById('somGol').checked) {
-        audioGol.currentTime = 0; audioGol.play().catch(()=>{});
-    }
-    
-    if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
-        let duracao = 3000; let fim = Date.now() + duracao;
-        (function frame() {
-            confetti({ particleCount: 6, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#005596', '#ff7f00', '#00873E', '#FFCC00'] });
-            confetti({ particleCount: 6, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#005596', '#ff7f00', '#00873E', '#FFCC00'] });
-            if (Date.now() < fim) requestAnimationFrame(frame);
-        }());
-    }
-    setTimeout(() => { m.style.display = 'none'; }, 4000);
-}
+    let modal =
+        document.getElementById(
+            'golMsg'
+        );
 
-function animarBola(id) {
+    document.getElementById(
+        'nomeArtilheiro'
+    ).innerText = nome;
+
+    modal.style.display='flex';
+
+    if(
+        document.getElementById(
+            'somGol'
+        ).checked
+    ){
+
+        audioGol.pause();
+
+        audioGol.currentTime = 0;
+
+        audioGol.play()
+        .catch(()=>{});
+
+    }
+
+    if(
+        document.getElementById(
+            'efeitoConfete'
+        ).checked &&
+        typeof confetti === 'function'
+    ){
+
+        confetti({
+            particleCount:250,
+            spread:180,
+            origin:{y:.6}
+        });
+
+    }
+
     setTimeout(() => {
-        let bola = document.getElementById(`bola-${id}`);
-        if(bola) {
-            bola.classList.add('girando');
-            setTimeout(() => bola.classList.remove('girando'), 1200);
+
+        modal.style.display='none';
+
+    },4000);
+
+}
+
+function animarBola(id){
+
+    setTimeout(() => {
+
+        let bola =
+            document.getElementById(
+                `bola-${id}`
+            );
+
+        if(bola){
+
+            bola.classList.add(
+                'girando'
+            );
+
+            setTimeout(() => {
+
+                bola.classList.remove(
+                    'girando'
+                );
+
+            },1200);
+
         }
-    }, 50);
+
+    },50);
+
 }
 
-function excluirP(id) {
-    if(confirm('Expulsar jogador?')) { participantes = participantes.filter(x => x.id !== id); render(); }
+function excluirP(id){
+
+    if(
+        confirm(
+            'Expulsar jogador?'
+        )
+    ){
+
+        participantes =
+            participantes.filter(
+                x => x.id !== id
+            );
+
+        render();
+
+    }
+
 }
 
-function zerarTudo() { 
-    if(confirm('Zerar o campeonato todo?')) { participantes.forEach(p => p.pontos = 0); fecharConfig(); render(); }
+function limparParticipantes(){
+
+    if(
+        confirm(
+            'Remover todos os participantes?'
+        )
+    ){
+
+        participantes = [];
+
+        render();
+
+        fecharConfig();
+
+    }
+
+}
+
+function zerarTudo(){
+
+    if(
+        confirm(
+            'Zerar pontuação de todos?'
+        )
+    ){
+
+        participantes.forEach(
+            p => p.pontos = 0
+        );
+
+        render();
+
+        fecharConfig();
+
+    }
+
 }
 
 function render() {
