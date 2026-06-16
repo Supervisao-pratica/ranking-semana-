@@ -723,6 +723,65 @@
 </div>
 
 <script>
+    // 1. PEGAR OS ELEMENTOS DE ÁUDIO E BOTÃO
+const audioAmbiente = document.getElementById('audioAmbiente');
+const audioGol = document.getElementById('audioGolFx');
+const btnAtivarSom = document.getElementById('ativarSomBtn');
+const checkSomAmbiente = document.getElementById('somAmbiente');
+
+// 2. LIGAR A TORCIDA DE FUNDO (Botão do topo)
+btnAtivarSom.addEventListener('click', () => {
+    audioAmbiente.volume = 0.2; // Volume baixinho de fundo
+    audioAmbiente.play().then(() => {
+        btnAtivarSom.innerText = "🔊 Som do Estádio Ativado!";
+        btnAtivarSom.style.background = "#28a745"; // Fica verde confirmando
+        checkSomAmbiente.checked = true; // Marca a caixinha nas configurações
+    }).catch(erro => {
+        alert("O navegador bloqueou o áudio. Clique novamente!");
+    });
+});
+
+// 3. LIGAR/DESLIGAR TORCIDA NAS CONFIGURAÇÕES
+checkSomAmbiente.addEventListener('change', () => {
+    if (checkSomAmbiente.checked) {
+        audioAmbiente.play();
+    } else {
+        audioAmbiente.pause();
+    }
+});
+
+// 4. FUNÇÃO DO GOL (Substitua a sua função dispararGol por esta)
+function dispararGol(nome) {
+    let m = document.getElementById('golMsg');
+    document.getElementById('nomeArtilheiro').innerText = nome;
+    m.style.display = 'flex';
+    
+    // Toca o grito de GOL
+    if (document.getElementById('somGol').checked) {
+        audioGol.currentTime = 0; // Volta o áudio do gol pro começo
+        audioGol.volume = 1.0;    // Coloca no volume máximo
+        audioGol.play();
+    }
+    
+    // Aumenta a vibração da torcida de fundo temporariamente
+    audioAmbiente.volume = 0.6; 
+    
+    // Explosão de confetes (se estiver marcado nas configurações)
+    if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
+        let fim = Date.now() + 4000;
+        (function frame() {
+            confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
+            confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
+            if (Date.now() < fim) requestAnimationFrame(frame);
+        }());
+    }
+
+    // Depois de 5 segundos, some a mensagem e abaixa a torcida de novo
+    setTimeout(() => { 
+        m.style.display = 'none'; 
+        audioAmbiente.volume = 0.2; // Volta a torcida pro volume baixinho
+    }, 5000);
+}
 
 /* ===========================
    DECORAÇÃO DE FUNDO
@@ -980,55 +1039,34 @@ function alterar(id,valor){
 
 }
 
-function dispararGol(nome){
-
-    let modal =
-        document.getElementById(
-            'golMsg'
-        );
-
-    document.getElementById(
-        'nomeArtilheiro'
-    ).innerText = nome;
-
-    modal.style.display='flex';
-
-    if(
-        document.getElementById(
-            'somGol'
-        ).checked
-    ){
-
-        audioGol.pause();
-
-        audioGol.currentTime = 0;
-
-        audioGol.play()
-        .catch(()=>{});
-
+function dispararGol(nome) {
+    let m = document.getElementById('golMsg');
+    document.getElementById('nomeArtilheiro').innerText = nome;
+    m.style.display = 'flex';
+    
+    // Dispara o som do Gol
+    audioGol.currentTime = 0; // Volta o áudio pro começo
+    audioGol.volume = 1.0;    // Volume no máximo
+    audioGol.play();
+    
+    // Aumenta a torcida de fundo por uns segundos para dar emoção
+    audioAmbiente.volume = 0.6; 
+    
+    // Se tiver os confetes, eles rodam aqui
+    if (typeof confetti === 'function') {
+        let fim = Date.now() + 4000;
+        (function frame() {
+            confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
+            confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
+            if (Date.now() < fim) requestAnimationFrame(frame);
+        }());
     }
 
-    if(
-        document.getElementById(
-            'efeitoConfete'
-        ).checked &&
-        typeof confetti === 'function'
-    ){
-
-        confetti({
-            particleCount:250,
-            spread:180,
-            origin:{y:.6}
-        });
-
-    }
-
-    setTimeout(() => {
-
-        modal.style.display='none';
-
-    },4000);
-
+    // Após 5 segundos, esconde a mensagem de gol e abaixa a torcida de novo
+    setTimeout(() => { 
+        m.style.display = 'none'; 
+        audioAmbiente.volume = 0.2; // Volta a torcida pro volume baixinho
+    }, 5000);
 }
 
 function animarBola(id){
