@@ -6,6 +6,8 @@
     <title>🏆 Lab InovAção - Copa do Mundo do Conhecimento</title>
 
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
     <style>
 
@@ -64,13 +66,34 @@
             bottom:-50px;
             font-size:30px;
             animation:subir linear infinite;
+            filter:drop-shadow(0 6px 10px rgba(0,0,0,.3));
+            opacity:.85;
+            will-change:transform,opacity;
         }
 
         @keyframes subir{
+            0%{
+                opacity:0;
+                transform:
+                translateY(0)
+                rotate(0deg)
+                scale(.75);
+            }
+
+            12%{
+                opacity:.9;
+            }
+
+            78%{
+                opacity:.9;
+            }
+
             to{
+                opacity:0;
                 transform:
                 translateY(-110vh)
-                rotate(360deg);
+                rotate(360deg)
+                scale(1.2);
             }
         }
 
@@ -117,10 +140,26 @@
             cursor:pointer;
             font-size:16px;
             font-weight:700;
+            animation:pulsoSom 1.6s ease-in-out infinite;
         }
 
         #ativarSomBtn:hover{
             transform:scale(1.05);
+        }
+
+        #ativarSomBtn.som-ligado{
+            background:#005596;
+            animation:none;
+        }
+
+        @keyframes pulsoSom{
+            0%,100%{
+                box-shadow:0 0 0 0 rgba(40,167,69,.45);
+            }
+
+            50%{
+                box-shadow:0 0 0 12px rgba(40,167,69,0);
+            }
         }
 
         /* =========================
@@ -186,6 +225,34 @@
             background:rgba(255,255,255,.85);
 
             transform:translateX(-50%);
+            z-index:1;
+            pointer-events:none;
+        }
+
+        .campo:after{
+            content:"";
+            position:absolute;
+            inset:0;
+            pointer-events:none;
+            z-index:2;
+            background:linear-gradient(
+                110deg,
+                transparent 0 38%,
+                rgba(255,255,255,.16) 46%,
+                transparent 55% 100%
+            );
+            transform:translateX(-120%);
+            animation:campoBrilho 8s ease-in-out infinite;
+        }
+
+        @keyframes campoBrilho{
+            0%,45%{
+                transform:translateX(-120%);
+            }
+
+            80%,100%{
+                transform:translateX(120%);
+            }
         }
 
         .circulo{
@@ -201,6 +268,8 @@
             border:6px solid rgba(255,255,255,.85);
 
             transform:translate(-50%,-50%);
+            z-index:1;
+            pointer-events:none;
         }
 
         .area-gol{
@@ -216,6 +285,8 @@
 
             border:6px solid rgba(255,255,255,.85);
             border-right:none;
+            z-index:1;
+            pointer-events:none;
         }
 
         /* =========================
@@ -230,12 +301,32 @@
 
             z-index:10;
 
-            transition:left 1.2s cubic-bezier(
+            transition:
+            left .9s cubic-bezier(
                 0.34,
                 1.56,
                 0.64,
                 1
-            );
+            ),
+            top .35s ease;
+            will-change:left,top,transform;
+        }
+
+        .player.entrando{
+            animation:entraJogador .45s ease both;
+        }
+
+        .player.saindo{
+            animation:saiJogador .28s ease forwards;
+            pointer-events:none;
+        }
+
+        .player.avancando .jogador-info{
+            animation:impulsoJogador .65s ease;
+        }
+
+        .player.avancando .bola{
+            animation:chuteBola .65s ease;
         }
 
         .jogador-info{
@@ -256,6 +347,7 @@
 
             box-shadow:
             0 4px 10px rgba(0,0,0,.5);
+            transition:box-shadow .25s ease, transform .25s ease;
         }
 
         .avatar-em-campo{
@@ -289,7 +381,9 @@
         }
 
         .bola.girando{
-            animation:girarBola 1s linear infinite;
+            animation:
+            girarBola .55s linear infinite,
+            quicarBola .45s ease-in-out 2;
         }
 
         @keyframes girarBola{
@@ -298,6 +392,89 @@
             }
             to{
                 transform:rotate(360deg);
+            }
+        }
+
+        @keyframes quicarBola{
+            0%,100%{
+                translate:0 0;
+            }
+
+            50%{
+                translate:0 -9px;
+            }
+        }
+
+        @keyframes chuteBola{
+            0%{
+                transform:translateX(0) scale(1);
+            }
+
+            45%{
+                transform:translateX(20px) scale(1.2) rotate(160deg);
+            }
+
+            100%{
+                transform:translateX(0) scale(1) rotate(360deg);
+            }
+        }
+
+        @keyframes impulsoJogador{
+            0%{
+                transform:translateY(0);
+                box-shadow:0 4px 10px rgba(0,0,0,.5);
+            }
+
+            45%{
+                transform:translateY(-6px) scale(1.04);
+                box-shadow:0 12px 22px rgba(0,0,0,.45);
+            }
+
+            100%{
+                transform:translateY(0);
+                box-shadow:0 4px 10px rgba(0,0,0,.5);
+            }
+        }
+
+        @keyframes entraJogador{
+            from{
+                opacity:0;
+                transform:translateX(-24px) scale(.9);
+            }
+
+            to{
+                opacity:1;
+                transform:translateX(0) scale(1);
+            }
+        }
+
+        @keyframes saiJogador{
+            to{
+                opacity:0;
+                transform:translateX(24px) scale(.88);
+            }
+        }
+
+        .pontos-pop{
+            position:absolute;
+            right:-34px;
+            top:-18px;
+            background:#FFD700;
+            color:#003b6f;
+            border:2px solid #fff;
+            border-radius:999px;
+            padding:2px 8px;
+            font-size:14px;
+            font-weight:900;
+            box-shadow:0 6px 14px rgba(0,0,0,.35);
+            animation:sobePontos .9s ease forwards;
+            pointer-events:none;
+        }
+
+        @keyframes sobePontos{
+            to{
+                opacity:0;
+                transform:translateY(-34px) scale(1.18);
             }
         }
 
@@ -415,6 +592,19 @@
 
             box-shadow:
             0 4px 6px rgba(0,0,0,.1);
+            animation:entraCard .22s ease both;
+        }
+
+        @keyframes entraCard{
+            from{
+                opacity:.3;
+                transform:translateY(6px);
+            }
+
+            to{
+                opacity:1;
+                transform:translateY(0);
+            }
         }
 
         .card input{
@@ -473,7 +663,7 @@
 
             border-radius:15px;
 
-            width:350px;
+            width:min(420px, calc(100vw - 30px));
 
             box-shadow:
             0 10px 30px rgba(0,0,0,.5);
@@ -489,6 +679,35 @@
             font-size:16px;
 
             cursor:pointer;
+        }
+
+        .status-nuvem{
+            border-radius:8px;
+            padding:9px 10px;
+            margin:12px 0 15px;
+            font-size:14px;
+            font-weight:700;
+            border-left:5px solid #777;
+            background:#f4f4f4;
+            color:#333;
+        }
+
+        .status-nuvem.ok{
+            border-left-color:#28a745;
+            background:#eaf8ef;
+            color:#1f7a39;
+        }
+
+        .status-nuvem.local{
+            border-left-color:#ff7f00;
+            background:#fff4e8;
+            color:#9a4c00;
+        }
+
+        .status-nuvem.erro{
+            border-left-color:#dc3545;
+            background:#fdecee;
+            color:#ad1f2d;
         }
 
         .btn-fechar{
@@ -520,6 +739,11 @@
             z-index:999;
         }
 
+        #golMsg.ativo{
+            display:flex;
+            animation:abreGol .25s ease both;
+        }
+
         .texto-gol{
             font-size:120px;
             font-weight:900;
@@ -529,7 +753,9 @@
             0 0 20px var(--laranja),
             0 0 40px #FF0000;
 
-            animation:pulsaGol .3s alternate infinite;
+            animation:
+            pulsaGol .3s alternate infinite,
+            brilhoGol 1.1s ease-in-out infinite;
         }
 
         .nome-gol{
@@ -543,6 +769,61 @@
             to{transform:scale(1.1);}
         }
 
+        @keyframes brilhoGol{
+            0%,100%{
+                text-shadow:
+                0 0 20px var(--laranja),
+                0 0 40px #FF0000;
+            }
+
+            50%{
+                text-shadow:
+                0 0 25px #fff,
+                0 0 60px #FFD700,
+                0 0 95px #FF0000;
+            }
+        }
+
+        @keyframes abreGol{
+            from{
+                opacity:0;
+                transform:scale(1.04);
+            }
+
+            to{
+                opacity:1;
+                transform:scale(1);
+            }
+        }
+
+        @media (max-width:1100px){
+            .layout{
+                grid-template-columns:1fr;
+                padding:12px;
+            }
+
+            .sidebar{
+                order:-1;
+                max-height:none;
+            }
+
+            .campo{
+                min-height:1800px;
+            }
+
+            h1{
+                font-size:22px;
+            }
+
+            .texto-gol{
+                font-size:56px;
+            }
+
+            .nome-gol{
+                font-size:30px;
+            }
+        }
+
     </style>
 
 </head>
@@ -550,21 +831,9 @@
 <body>
 
 <!-- Áudios -->
-<audio id="audioAmbiente"
-       src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Football_crowd_-_cheering_and_chants.ogg"
-       loop
-       preload="auto">
-</audio>
-
-<audio id="audioGolFx"
-       src="https://upload.wikimedia.org/wikipedia/commons/2/23/Cheering_crowd.ogg"
-       preload="auto">
-</audio>
-
-<audio id="audioApitoFx"
-       src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Referee_Whistle.ogg"
-       preload="auto">
-</audio>
+<audio id="audioAmbiente" loop preload="none"></audio>
+<audio id="audioGolFx" preload="none"></audio>
+<audio id="audioApitoFx" preload="none"></audio>
 
 <div class="decoracao-fundo" id="festaFundo"></div>
 
@@ -694,6 +963,10 @@
             🎊 Explosão de Confetes
         </label>
 
+        <div id="statusNuvem" class="status-nuvem local">
+            Nuvem: modo local
+        </div>
+
         <hr>
 
         <button
@@ -723,87 +996,209 @@
 </div>
 
 <script>
-    <script>
-    // 1. DADOS E ELEMENTOS DE ÁUDIO
-    let participantes = JSON.parse(localStorage.getItem('copaLabAnimada')) || [];
-    
-    const audioAmbiente = document.getElementById('audioAmbiente');
-    const audioGol = document.getElementById('audioGolFx');
-    const audioApito = document.getElementById('audioApitoFx');
-    const btnAtivarSom = document.getElementById('ativarSomBtn');
-    const checkSomAmbiente = document.getElementById('somAmbiente');
 
-    // 2. LIGAR A TORCIDA DE FUNDO (Botão do topo)
-    btnAtivarSom.addEventListener('click', () => {
-        audioAmbiente.volume = 0.2; // Volume baixinho de fundo
-        audioAmbiente.play().then(() => {
-            btnAtivarSom.innerText = "🔊 Som do Estádio Ativado!";
-            btnAtivarSom.style.background = "#28a745"; // Fica verde confirmando
-            if(checkSomAmbiente) checkSomAmbiente.checked = true; 
-        }).catch(erro => {
-            alert("O navegador bloqueou o áudio. Clique novamente!");
-        });
+/* ===========================
+   DECORAÇÃO DE FUNDO
+=========================== */
+
+const fundo = document.getElementById('festaFundo');
+
+const emojisFesta = [
+    '🇧🇷',
+    '🎉',
+    '⚽',
+    '🏆',
+    '🎈',
+    '✨'
+];
+
+for(let i=0;i<30;i++){
+
+    let el = document.createElement('div');
+
+    el.className = 'flutuante';
+
+    el.innerText =
+        emojisFesta[
+            Math.floor(
+                Math.random()*emojisFesta.length
+            )
+        ];
+
+    el.style.left =
+        Math.random()*100 + 'vw';
+
+    el.style.animationDuration =
+        (Math.random()*10+10)+'s';
+
+    el.style.animationDelay =
+        (Math.random()*10)+'s';
+
+    fundo.appendChild(el);
+}
+
+/* ===========================
+   DADOS
+=========================== */
+
+let participantes = carregarParticipantesSalvos();
+
+function carregarParticipantesSalvos(){
+    try{
+        const dados = JSON.parse(
+            localStorage.getItem('copaLabAnimada') || '[]'
+        );
+
+        return Array.isArray(dados) ? dados : [];
+    }catch(erro){
+        console.warn('Dados locais invalidos foram ignorados:', erro);
+        localStorage.removeItem('copaLabAnimada');
+        return [];
+    }
+}
+
+const audioAmbiente =
+    document.getElementById(
+        'audioAmbiente'
+    );
+
+const audioGol =
+    document.getElementById(
+        'audioGolFx'
+    );
+
+const audioApito =
+    document.getElementById(
+        'audioApitoFx'
+    );
+
+/* ===========================
+   BOTÃO DE SOM
+=========================== */
+
+document
+.getElementById('ativarSomBtn')
+.addEventListener('click', () => {
+
+    audioAmbiente.volume = 0.15;
+
+    document.getElementById(
+        'somAmbiente'
+    ).checked = true;
+
+    audioAmbiente.play()
+    .then(() => {
+
+        document.getElementById(
+            'ativarSomBtn'
+        ).innerHTML =
+        '🔊 Sons Ativados';
+
+    })
+    .catch(err => {
+        console.log(err);
     });
 
-    // 3. LIGAR/DESLIGAR TORCIDA NAS CONFIGURAÇÕES
-    if(checkSomAmbiente) {
-        checkSomAmbiente.addEventListener('change', () => {
-            if (checkSomAmbiente.checked) {
-                audioAmbiente.play();
-            } else {
-                audioAmbiente.pause();
-            }
-        });
+});
+
+/* ===========================
+   FUNÇÕES
+=========================== */
+
+function save(){
+
+    localStorage.setItem(
+        'copaLabAnimada',
+        JSON.stringify(participantes)
+    );
+
+}
+
+function abrirConfig(){
+    document.getElementById(
+        'configModal'
+    ).style.display = 'flex';
+}
+
+function fecharConfig(){
+    document.getElementById(
+        'configModal'
+    ).style.display = 'none';
+}
+
+function toggleAmbiente(){
+
+    if(
+        document.getElementById(
+            'somAmbiente'
+        ).checked
+    ){
+
+        audioAmbiente.play()
+        .catch(()=>{});
+
+    }else{
+
+        audioAmbiente.pause();
+
     }
 
-    // 4. FUNÇÃO DO GOL (Agora unificada e pronta para gritar alto)
-    function dispararGol(nome) {
-        let m = document.getElementById('golMsg');
-        document.getElementById('nomeArtilheiro').innerText = nome;
-        m.style.display = 'flex';
-        
-        // Toca o grito de GOL
-        if (document.getElementById('somGol').checked) {
-            audioGol.currentTime = 0; // Volta o áudio do gol pro começo
-            audioGol.volume = 1.0;    // Coloca no volume máximo
-            audioGol.play();
-        }
-        
-        // Aumenta a vibração da torcida de fundo temporariamente
-        audioAmbiente.volume = 0.6; 
-        
-        // Explosão de confetes
-        if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
-            let fim = Date.now() + 4000;
-            (function frame() {
-                confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#005596', '#FFCC00', '#00873E'] });
-                confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#005596', '#FFCC00', '#00873E'] });
-                if (Date.now() < fim) requestAnimationFrame(frame);
-            }());
-        }
+}
 
-        // Depois de 5 segundos, some a mensagem e abaixa a torcida de novo
-        setTimeout(() => { 
-            m.style.display = 'none'; 
-            audioAmbiente.volume = 0.2; 
-        }, 5000);
+document
+.getElementById('somAmbiente')
+.addEventListener(
+    'change',
+    toggleAmbiente
+);
+
+function tocarApito(){
+
+    if(
+        document.getElementById(
+            'somApito'
+        ).checked
+    ){
+
+        audioApito.pause();
+
+        audioApito.currentTime = 0;
+
+        audioApito.play()
+        .catch(()=>{});
+
     }
 
-    // 5. DECORAÇÃO DE FUNDO ANIMADA
-    const fundo = document.getElementById('festaFundo');
-    const emojisFesta = ['🇧🇷', '🎉', '⚽', '🏆', '🎈', '✨'];
+}
 
-    for(let i=0; i<30; i++) {
-        let el = document.createElement('div');
-        el.className = 'flutuante';
-        el.innerText = emojisFesta[Math.floor(Math.random() * emojisFesta.length)];
-        el.style.left = Math.random() * 100 + 'vw';
-        el.style.animationDuration = (Math.random() * 10 + 10) + 's';
-        el.style.animationDelay = (Math.random() * 10) + 's';
-        fundo.appendChild(el);
-    }
+function add(){
 
-       render();
+    let nome =
+        document.getElementById(
+            'nomeNovo'
+        ).value.trim();
+
+    let avatar =
+        document.getElementById(
+            'avatarNovo'
+        ).value;
+
+    if(!nome) return;
+
+    participantes.push({
+        id:Date.now(),
+        nome:nome,
+        avatar:avatar,
+        pontos:0
+    });
+
+    document.getElementById(
+        'nomeNovo'
+    ).value='';
+
+    tocarApito();
+
+    render();
 
 }
 
@@ -867,34 +1262,55 @@ function alterar(id,valor){
 
 }
 
-function dispararGol(nome) {
-    let m = document.getElementById('golMsg');
-    document.getElementById('nomeArtilheiro').innerText = nome;
-    m.style.display = 'flex';
-    
-    // Dispara o som do Gol
-    audioGol.currentTime = 0; // Volta o áudio pro começo
-    audioGol.volume = 1.0;    // Volume no máximo
-    audioGol.play();
-    
-    // Aumenta a torcida de fundo por uns segundos para dar emoção
-    audioAmbiente.volume = 0.6; 
-    
-    // Se tiver os confetes, eles rodam aqui
-    if (typeof confetti === 'function') {
-        let fim = Date.now() + 4000;
-        (function frame() {
-            confetti({ particleCount: 8, angle: 60, spread: 60, origin: { x: 0 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
-            confetti({ particleCount: 8, angle: 120, spread: 60, origin: { x: 1 }, colors: ['#0038A8', '#FFD100', '#009B3A'] });
-            if (Date.now() < fim) requestAnimationFrame(frame);
-        }());
+function dispararGol(nome){
+
+    let modal =
+        document.getElementById(
+            'golMsg'
+        );
+
+    document.getElementById(
+        'nomeArtilheiro'
+    ).innerText = nome;
+
+    modal.style.display='flex';
+
+    if(
+        document.getElementById(
+            'somGol'
+        ).checked
+    ){
+
+        audioGol.pause();
+
+        audioGol.currentTime = 0;
+
+        audioGol.play()
+        .catch(()=>{});
+
     }
 
-    // Após 5 segundos, esconde a mensagem de gol e abaixa a torcida de novo
-    setTimeout(() => { 
-        m.style.display = 'none'; 
-        audioAmbiente.volume = 0.2; // Volta a torcida pro volume baixinho
-    }, 5000);
+    if(
+        document.getElementById(
+            'efeitoConfete'
+        ).checked &&
+        typeof confetti === 'function'
+    ){
+
+        confetti({
+            particleCount:250,
+            spread:180,
+            origin:{y:.6}
+        });
+
+    }
+
+    setTimeout(() => {
+
+        modal.style.display='none';
+
+    },4000);
+
 }
 
 function animarBola(id){
@@ -1053,7 +1469,704 @@ rank.forEach((p, i) => {
 });
     
 }
-render();
+/* ===========================
+   MELHORIAS: SOM, NUVEM E ANIMACOES
+=========================== */
+
+const CLOUD_PATH = 'placares/copa-lab-animada';
+
+// Para salvar na nuvem usando GitHub Pages, crie um projeto no Firebase
+// Realtime Database e cole aqui as chaves de configuracao do seu app web.
+const firebaseConfig = {
+    apiKey: '',
+    authDomain: '',
+    databaseURL: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: ''
+};
+
+const APP_STATE = {
+    storageKey:'copaLabAnimada',
+    cloudRef:null,
+    cloudReady:false,
+    recebendoNuvem:false,
+    primeiraLeituraNuvem:true,
+    cloudSaveTimer:null,
+    audioCtx:null,
+    torcida:null,
+    bufferTorcida:null,
+    somAtivado:false,
+    golTimer:null
+};
+
+function iniciarAplicacao(){
+    participantes = normalizarParticipantes(participantes);
+    salvarLocal();
+    trocarBotaoSom();
+    configurarEntradaPorEnter();
+    render(false);
+    iniciarNuvem();
+}
+
+function trocarBotaoSom(){
+    const botaoAntigo = document.getElementById('ativarSomBtn');
+    if(!botaoAntigo) return;
+
+    const botaoNovo = botaoAntigo.cloneNode(true);
+    botaoNovo.textContent = 'Ativar sons do estadio';
+    botaoAntigo.parentNode.replaceChild(botaoNovo, botaoAntigo);
+    botaoNovo.addEventListener('click', ativarSom);
+}
+
+function configurarEntradaPorEnter(){
+    const inputNome = document.getElementById('nomeNovo');
+    if(!inputNome) return;
+
+    inputNome.addEventListener('keydown', event => {
+        if(event.key === 'Enter'){
+            add();
+        }
+    });
+}
+
+function normalizarParticipantes(lista){
+    const idsUsados = new Set();
+
+    return (Array.isArray(lista) ? lista : [])
+        .map(item => {
+            let id = Number(item && item.id);
+
+            if(!Number.isFinite(id) || idsUsados.has(id)){
+                id = gerarId();
+            }
+
+            idsUsados.add(id);
+
+            return {
+                id,
+                nome:String(item && item.nome ? item.nome : '').trim().slice(0,60),
+                avatar:String(item && item.avatar ? item.avatar : '\uD83D\uDC64').slice(0,12),
+                pontos:Math.max(0, Number(item && item.pontos) || 0)
+            };
+        })
+        .filter(item => item.nome);
+}
+
+function gerarId(){
+    return Date.now() + Math.floor(Math.random() * 100000);
+}
+
+function salvarLocal(){
+    localStorage.setItem(
+        APP_STATE.storageKey,
+        JSON.stringify(participantes)
+    );
+}
+
+function save(){
+    salvarLocal();
+
+    if(APP_STATE.cloudReady && !APP_STATE.recebendoNuvem){
+        agendarSalvarNuvem();
+    }
+}
+
+function firebaseConfigValida(){
+    return Boolean(
+        firebaseConfig.apiKey &&
+        firebaseConfig.databaseURL &&
+        firebaseConfig.projectId &&
+        firebaseConfig.appId
+    );
+}
+
+function atualizarStatusNuvem(texto,tipo){
+    const status = document.getElementById('statusNuvem');
+    if(!status) return;
+
+    status.textContent = texto;
+    status.className = `status-nuvem ${tipo || 'local'}`;
+}
+
+function iniciarNuvem(){
+    if(!firebaseConfigValida()){
+        atualizarStatusNuvem('Nuvem: configure o Firebase no codigo', 'local');
+        return;
+    }
+
+    if(!window.firebase || !firebase.database){
+        atualizarStatusNuvem('Nuvem: Firebase nao carregou', 'erro');
+        return;
+    }
+
+    try{
+        if(!firebase.apps.length){
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        APP_STATE.cloudRef = firebase.database().ref(CLOUD_PATH);
+        APP_STATE.cloudReady = true;
+        atualizarStatusNuvem('Nuvem: conectando...', 'local');
+
+        APP_STATE.cloudRef.on(
+            'value',
+            snapshot => {
+                const dados = snapshot.val();
+
+                if(dados && Array.isArray(dados.participantes)){
+                    APP_STATE.recebendoNuvem = true;
+                    participantes = normalizarParticipantes(dados.participantes);
+                    salvarLocal();
+                    render(false);
+                    APP_STATE.recebendoNuvem = false;
+                    atualizarStatusNuvem('Nuvem: sincronizada', 'ok');
+                }else if(APP_STATE.primeiraLeituraNuvem && participantes.length){
+                    enviarNuvem();
+                }else{
+                    atualizarStatusNuvem('Nuvem: conectada', 'ok');
+                }
+
+                APP_STATE.primeiraLeituraNuvem = false;
+            },
+            erro => {
+                console.warn('Erro ao ler Firebase:', erro);
+                APP_STATE.cloudReady = false;
+                atualizarStatusNuvem('Nuvem: erro de permissao', 'erro');
+            }
+        );
+    }catch(erro){
+        console.warn('Erro ao iniciar Firebase:', erro);
+        APP_STATE.cloudReady = false;
+        atualizarStatusNuvem('Nuvem: configuracao invalida', 'erro');
+    }
+}
+
+function agendarSalvarNuvem(){
+    clearTimeout(APP_STATE.cloudSaveTimer);
+    APP_STATE.cloudSaveTimer = setTimeout(enviarNuvem, 450);
+}
+
+function enviarNuvem(){
+    if(!APP_STATE.cloudRef) return;
+
+    APP_STATE.cloudRef
+        .set({
+            participantes:normalizarParticipantes(participantes),
+            atualizadoEm:new Date().toISOString()
+        })
+        .then(() => {
+            const hora = new Date().toLocaleTimeString(
+                'pt-BR',
+                {hour:'2-digit',minute:'2-digit'}
+            );
+
+            atualizarStatusNuvem(`Nuvem: salvo as ${hora}`, 'ok');
+        })
+        .catch(erro => {
+            console.warn('Erro ao salvar Firebase:', erro);
+            atualizarStatusNuvem('Nuvem: erro ao salvar', 'erro');
+        });
+}
+
+function obterAudioCtx(){
+    const AudioAPI = window.AudioContext || window.webkitAudioContext;
+    if(!AudioAPI) return null;
+
+    if(!APP_STATE.audioCtx || APP_STATE.audioCtx.state === 'closed'){
+        APP_STATE.audioCtx = new AudioAPI();
+    }
+
+    return APP_STATE.audioCtx;
+}
+
+async function prepararAudio(){
+    const ctx = obterAudioCtx();
+
+    if(!ctx){
+        throw new Error('Web Audio indisponivel');
+    }
+
+    APP_STATE.somAtivado = true;
+    atualizarBotaoSom(true);
+
+    if(ctx.state === 'suspended'){
+        await Promise.race([
+            ctx.resume().catch(() => {}),
+            new Promise(resolve => setTimeout(resolve, 250))
+        ]);
+    }
+
+    return ctx;
+}
+
+function atualizarBotaoSom(ativo,erro){
+    const botao = document.getElementById('ativarSomBtn');
+    if(!botao) return;
+
+    if(erro){
+        botao.textContent = 'Som indisponivel';
+        botao.classList.remove('som-ligado');
+        return;
+    }
+
+    botao.textContent = ativo ? 'Sons ativados' : 'Ativar sons do estadio';
+    botao.classList.toggle('som-ligado', Boolean(ativo));
+}
+
+function ativarSom(){
+    const ambiente = document.getElementById('somAmbiente');
+    if(ambiente) ambiente.checked = true;
+
+    prepararAudio()
+        .then(() => {
+            iniciarTorcida();
+            tocarApito(true);
+        })
+        .catch(() => atualizarBotaoSom(false,true));
+}
+
+function criarBufferTorcida(ctx){
+    if(APP_STATE.bufferTorcida) return APP_STATE.bufferTorcida;
+
+    const duracao = 2;
+    const buffer = ctx.createBuffer(
+        1,
+        ctx.sampleRate * duracao,
+        ctx.sampleRate
+    );
+    const dados = buffer.getChannelData(0);
+
+    for(let i=0;i<dados.length;i++){
+        const ruido = (Math.random() * 2 - 1) * .34;
+        const onda = Math.sin(i / 34) * .045;
+        dados[i] = ruido + onda;
+    }
+
+    APP_STATE.bufferTorcida = buffer;
+    return buffer;
+}
+
+function iniciarTorcida(){
+    const ambiente = document.getElementById('somAmbiente');
+    if(ambiente && !ambiente.checked) return;
+    if(APP_STATE.torcida) return;
+
+    prepararAudio()
+        .then(ctx => {
+            const source = ctx.createBufferSource();
+            const filter = ctx.createBiquadFilter();
+            const gain = ctx.createGain();
+            const lfo = ctx.createOscillator();
+            const lfoGain = ctx.createGain();
+
+            source.buffer = criarBufferTorcida(ctx);
+            source.loop = true;
+
+            filter.type = 'bandpass';
+            filter.frequency.value = 620;
+            filter.Q.value = .75;
+
+            gain.gain.value = .032;
+
+            lfo.frequency.value = .32;
+            lfoGain.gain.value = .008;
+
+            source.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            lfo.connect(lfoGain);
+            lfoGain.connect(gain.gain);
+
+            source.start();
+            lfo.start();
+
+            APP_STATE.torcida = {source,filter,gain,lfo,lfoGain};
+        })
+        .catch(() => atualizarBotaoSom(false,true));
+}
+
+function pararTorcida(){
+    if(!APP_STATE.torcida || !APP_STATE.audioCtx) return;
+
+    const ctx = APP_STATE.audioCtx;
+    const torcidaAtual = APP_STATE.torcida;
+    APP_STATE.torcida = null;
+
+    try{
+        torcidaAtual.gain.gain.setTargetAtTime(.0001, ctx.currentTime, .18);
+
+        setTimeout(() => {
+            try{
+                torcidaAtual.source.stop();
+                torcidaAtual.lfo.stop();
+                torcidaAtual.source.disconnect();
+                torcidaAtual.lfo.disconnect();
+            }catch(erro){
+                console.warn('Erro ao parar torcida:', erro);
+            }
+        }, 360);
+    }catch(erro){
+        console.warn('Erro ao encerrar audio ambiente:', erro);
+    }
+}
+
+function toggleAmbiente(){
+    if(document.getElementById('somAmbiente').checked){
+        iniciarTorcida();
+    }else{
+        pararTorcida();
+    }
+}
+
+function tocarTom(ctx,frequencia,inicio,duracao,volume,tipo,frequenciaFinal){
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = tipo || 'sine';
+    osc.frequency.setValueAtTime(frequencia, inicio);
+
+    if(frequenciaFinal){
+        osc.frequency.exponentialRampToValueAtTime(
+            frequenciaFinal,
+            inicio + duracao * .88
+        );
+    }
+
+    gain.gain.setValueAtTime(.0001, inicio);
+    gain.gain.exponentialRampToValueAtTime(volume, inicio + .018);
+    gain.gain.exponentialRampToValueAtTime(.0001, inicio + duracao);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(inicio);
+    osc.stop(inicio + duracao + .05);
+}
+
+function tocarRuido(ctx,inicio,duracao,volume,frequencia,tipo){
+    const tamanho = Math.max(1, Math.floor(ctx.sampleRate * duracao));
+    const buffer = ctx.createBuffer(1, tamanho, ctx.sampleRate);
+    const dados = buffer.getChannelData(0);
+
+    for(let i=0;i<tamanho;i++){
+        const progresso = i / tamanho;
+        const envelope = Math.sin(Math.PI * progresso);
+        dados[i] = (Math.random() * 2 - 1) * envelope;
+    }
+
+    const source = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    source.buffer = buffer;
+    filter.type = tipo || 'bandpass';
+    filter.frequency.value = frequencia || 850;
+    filter.Q.value = .9;
+    gain.gain.value = volume;
+
+    source.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    source.start(inicio);
+    source.stop(inicio + duracao);
+}
+
+function tocarApito(curto){
+    if(!document.getElementById('somApito').checked) return;
+
+    prepararAudio()
+        .then(ctx => {
+            const inicio = ctx.currentTime + .01;
+            const duracao = curto ? .13 : .24;
+
+            tocarTom(ctx, 1450, inicio, duracao, .13, 'sine', 1900);
+            tocarTom(ctx, 980, inicio + duracao * .55, duracao * .78, .08, 'square', 1280);
+        })
+        .catch(() => {});
+}
+
+function tocarGol(){
+    if(!document.getElementById('somGol').checked) return;
+
+    prepararAudio()
+        .then(ctx => {
+            const inicio = ctx.currentTime + .02;
+            const notas = [392,523,659,784,1046];
+
+            notas.forEach((nota,indice) => {
+                tocarTom(ctx, nota, inicio + indice * .09, .22, .09, 'triangle');
+            });
+
+            tocarRuido(ctx, inicio + .16, 1.45, .18, 780, 'bandpass');
+            tocarRuido(ctx, inicio + .55, .75, .12, 1250, 'highpass');
+        })
+        .catch(() => {});
+}
+
+function add(){
+    const inputNome = document.getElementById('nomeNovo');
+    const nome = inputNome.value.trim();
+    const avatar = document.getElementById('avatarNovo').value;
+
+    if(!nome){
+        inputNome.focus();
+        return;
+    }
+
+    participantes.push({
+        id:gerarId(),
+        nome:nome.slice(0,60),
+        avatar,
+        pontos:0
+    });
+
+    inputNome.value = '';
+    tocarApito();
+    render();
+}
+
+function editar(id,valor){
+    const p = participantes.find(item => item.id === id);
+    if(!p) return;
+
+    const nome = String(valor || '').trim().slice(0,60);
+    if(!nome) return;
+
+    p.nome = nome;
+    render();
+}
+
+function alterar(id,valor){
+    const p = participantes.find(item => item.id === id);
+    if(!p) return;
+
+    const anterior = p.pontos;
+    p.pontos = Math.max(0, p.pontos + valor);
+
+    const marcouGol = valor > 0 && p.pontos >= 100 && anterior < 100;
+
+    render();
+
+    if(valor > 0){
+        animarBola(id);
+        mostrarPontos(id, valor);
+    }
+
+    if(marcouGol){
+        dispararGol(p.nome);
+    }else if(valor > 0){
+        tocarApito();
+    }
+}
+
+function dispararGol(nome){
+    const modal = document.getElementById('golMsg');
+    const nomeArtilheiro = document.getElementById('nomeArtilheiro');
+
+    nomeArtilheiro.innerText = nome;
+    modal.classList.add('ativo');
+    modal.style.display = 'flex';
+
+    tocarGol();
+
+    if(
+        document.getElementById('efeitoConfete').checked &&
+        typeof confetti === 'function'
+    ){
+        confetti({
+            particleCount:220,
+            spread:170,
+            scalar:1.1,
+            origin:{y:.62}
+        });
+
+        setTimeout(() => {
+            confetti({
+                particleCount:120,
+                spread:120,
+                startVelocity:42,
+                origin:{x:.18,y:.72}
+            });
+
+            confetti({
+                particleCount:120,
+                spread:120,
+                startVelocity:42,
+                origin:{x:.82,y:.72}
+            });
+        }, 280);
+    }
+
+    clearTimeout(APP_STATE.golTimer);
+    APP_STATE.golTimer = setTimeout(() => {
+        modal.classList.remove('ativo');
+        modal.style.display = 'none';
+    }, 3800);
+}
+
+function animarBola(id){
+    requestAnimationFrame(() => {
+        const bola = document.getElementById(`bola-${id}`);
+        if(!bola) return;
+
+        bola.classList.remove('girando');
+        void bola.offsetWidth;
+        bola.classList.add('girando');
+
+        setTimeout(() => {
+            bola.classList.remove('girando');
+        }, 900);
+    });
+}
+
+function mostrarPontos(id,valor){
+    const player = document.getElementById(`player-${id}`);
+    if(!player) return;
+
+    const tag = document.createElement('span');
+    tag.className = 'pontos-pop';
+    tag.textContent = `+${valor}`;
+    player.appendChild(tag);
+
+    setTimeout(() => tag.remove(), 920);
+}
+
+function excluirP(id){
+    if(confirm('Expulsar participante?')){
+        participantes = participantes.filter(item => item.id !== id);
+        render();
+    }
+}
+
+function limparParticipantes(){
+    if(confirm('Remover todos os participantes?')){
+        participantes = [];
+        render();
+        fecharConfig();
+    }
+}
+
+function zerarTudo(){
+    if(confirm('Zerar pontuacao de todos?')){
+        participantes.forEach(item => item.pontos = 0);
+        render();
+        fecharConfig();
+    }
+}
+
+function escapeHTML(valor){
+    return String(valor).replace(/[&<>"']/g, char => ({
+        '&':'&amp;',
+        '<':'&lt;',
+        '>':'&gt;',
+        '"':'&quot;',
+        "'":'&#39;'
+    }[char]));
+}
+
+function render(deveSalvar = true){
+    if(deveSalvar){
+        save();
+    }
+
+    const rank = [...participantes].sort((a,b) => {
+        if(b.pontos !== a.pontos) return b.pontos - a.pontos;
+        return a.nome.localeCompare(b.nome, 'pt-BR');
+    });
+
+    document.getElementById('controles').innerHTML = participantes.map(p => {
+        const nome = escapeHTML(p.nome);
+        const avatar = escapeHTML(p.avatar);
+
+        return `
+            <div class="card">
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                    <div style="display:flex; align-items:center; gap:5px; width:100%; min-width:0;">
+                        <span style="font-size:20px;">${avatar}</span>
+                        <input value="${nome}" onchange="editar(${p.id}, this.value)">
+                    </div>
+                    <strong style="color: var(--laranja); font-size: 18px; white-space:nowrap;">${p.pontos} pts</strong>
+                </div>
+                <div class="btn-group">
+                    <button onclick="alterar(${p.id}, 6)">+6</button>
+                    <button onclick="alterar(${p.id}, 8)">+8</button>
+                    <button onclick="alterar(${p.id}, 10)">+10</button>
+                    <button onclick="alterar(${p.id}, 20)">+20</button>
+                    <button onclick="alterar(${p.id}, 25)">+25</button>
+                    <button onclick="alterar(${p.id}, 50)">+50</button>
+                    <button title="Remover participante" style="background:transparent; color:#dc3545; border:1px solid #dc3545" onclick="excluirP(${p.id})">&#128465;</button>
+                    <button class="btn-var" onclick="alterar(${p.id}, -10)">VAR (-10 pts)</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    const campo = document.getElementById('campo');
+    const alturaNecessaria = Math.max(2800, rank.length * 76 + 220);
+    campo.style.height = alturaNecessaria + 'px';
+
+    const idsAtuais = new Set();
+
+    rank.forEach((p,indice) => {
+        const idPlayer = `player-${p.id}`;
+        let player = document.getElementById(idPlayer);
+        const novo = !player;
+        const progresso = Math.min((p.pontos / 100) * 88, 88);
+        const anterior = Number(player && player.dataset.progresso || 0);
+
+        if(!player){
+            player = document.createElement('div');
+            player.id = idPlayer;
+            player.className = 'player entrando';
+            player.style.left = '0%';
+            campo.appendChild(player);
+
+            setTimeout(() => {
+                player.classList.remove('entrando');
+            }, 520);
+        }
+
+        idsAtuais.add(idPlayer);
+
+        player.style.top = (40 + indice * 76) + 'px';
+        player.dataset.progresso = progresso;
+        player.innerHTML = `
+            <div class="jogador-info">
+                <span class="avatar-em-campo">${escapeHTML(p.avatar)}</span>
+                <span class="nome">${escapeHTML(p.nome)}</span>
+                <span class="pts">${p.pontos}</span>
+            </div>
+
+            <div class="bola" id="bola-${p.id}">
+                &#9917;
+            </div>
+        `;
+
+        if(!novo && progresso > anterior){
+            player.classList.remove('avancando');
+            void player.offsetWidth;
+            player.classList.add('avancando');
+
+            setTimeout(() => {
+                player.classList.remove('avancando');
+            }, 760);
+        }
+
+        requestAnimationFrame(() => {
+            player.style.left = progresso + '%';
+        });
+    });
+
+    campo.querySelectorAll('.player').forEach(player => {
+        if(idsAtuais.has(player.id)) return;
+
+        player.classList.add('saindo');
+        setTimeout(() => player.remove(), 280);
+    });
+}
+
+iniciarAplicacao();
 </script>
 </body>
 </html>
