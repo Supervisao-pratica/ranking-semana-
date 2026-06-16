@@ -1,165 +1,303 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Lab InovAção - Copa do Mundo</title>
-<style>
-:root{--azul:#005596;--laranja:#ff7f00;}
-*{box-sizing:border-box}
-body{margin:0;font-family:Segoe UI,Arial,sans-serif;background:#eef2f5}
-header{background:linear-gradient(90deg,var(--azul),#0d74c5);color:#fff;text-align:center;padding:15px}
-.layout{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:12px}
-.estadio{background:#444;color:#fff;padding:8px;text-align:center;font-size:20px;overflow:hidden;white-space:nowrap}
-.torcida{display:inline-block;animation:move 12s linear infinite}
-@keyframes move{from{transform:translateX(100%)}to{transform:translateX(-100%)}}
-.campo{position:relative;height:850px;border-radius:12px;overflow:auto;border:5px solid #fff;
-background:repeating-linear-gradient(90deg,#1d7a2a 0,#1d7a2a 120px,#278c36 120px,#278c36 240px)}
-.campo:before{content:"";position:absolute;left:50%;top:0;bottom:0;width:4px;background:#fff}
-.circulo{position:absolute;left:50%;top:50%;width:180px;height:180px;border:4px solid #fff;border-radius:50%;transform:translate(-50%,-50%)}
-.gol{position:absolute;right:0;top:50%;transform:translateY(-50%);width:40px;height:220px;border:4px solid #fff;border-right:none}
-.player{position:absolute;transition:all 1s ease}
-.bola{font-size:32px;animation:girar 2s linear infinite}
-@keyframes girar{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-.nome,.pts{color:#fff;text-shadow:1px 1px 2px #000;font-size:12px;font-weight:bold}
-.sidebar{background:#fff;border-radius:12px;padding:12px;max-height:900px;overflow:auto}
-input,textarea{width:100%;padding:8px;margin:4px 0}
-button{border:none;border-radius:6px;padding:6px 10px;margin:2px;color:#fff;background:var(--azul);cursor:pointer}
-.laranja{background:var(--laranja)}
-.rank{display:flex;justify-content:space-between;padding:6px;border-bottom:1px solid #ddd}
-.card{border:1px solid #ddd;border-radius:8px;padding:8px;margin:6px 0}
-#golMsg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);color:#fff;font-size:48px;
-align-items:center;justify-content:center;z-index:999}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab InovAção - Copa do Mundo</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --azul: #005596;
+            --laranja: #ff7f00;
+            --grama-clara: #4c9a2a;
+            --grama-escura: #418722;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; background: #1a1a2e; color: #333; overflow-x: hidden; }
+        
+        /* Cabeçalho Painel de LED */
+        header { 
+            background: #0f0f1a; color: #fff; text-align: center; padding: 20px; 
+            border-bottom: 4px solid var(--laranja); box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        h1 { margin: 0; font-size: 28px; text-transform: uppercase; letter-spacing: 2px; text-shadow: 0 0 10px var(--azul); }
+        .meta-txt { color: var(--laranja); font-weight: bold; font-size: 18px; margin-top: 5px; }
+
+        .layout { display: grid; grid-template-columns: 1fr 380px; gap: 20px; padding: 20px; max-width: 1600px; margin: auto; }
+        
+        /* O Campo Realista */
+        .estadio-container { background: #222; padding: 15px; border-radius: 15px; box-shadow: inset 0 0 50px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5); }
+        .campo {
+            position: relative; height: 800px; border-radius: 8px; overflow: hidden;
+            border: 6px solid #fff; box-shadow: 0 0 20px rgba(255,255,255,0.2);
+            background: repeating-linear-gradient(90deg, var(--grama-clara) 0, var(--grama-clara) 100px, var(--grama-escura) 100px, var(--grama-escura) 200px);
+        }
+        
+        /* Linhas do Campo */
+        .campo:before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 6px; background: rgba(255,255,255,0.8); transform: translateX(-50%); }
+        .circulo { position: absolute; left: 50%; top: 50%; width: 200px; height: 200px; border: 6px solid rgba(255,255,255,0.8); border-radius: 50%; transform: translate(-50%, -50%); }
+        .ponto-central { position: absolute; left: 50%; top: 50%; width: 12px; height: 12px; background: rgba(255,255,255,0.8); border-radius: 50%; transform: translate(-50%, -50%); }
+        .area-gol { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 150px; height: 350px; border: 6px solid rgba(255,255,255,0.8); border-right: none; }
+        .pequena-area { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 60px; height: 160px; border: 6px solid rgba(255,255,255,0.8); border-right: none; }
+        .meia-lua { position: absolute; right: 150px; top: 50%; transform: translateY(-50%); width: 80px; height: 160px; border: 6px solid rgba(255,255,255,0.8); border-radius: 100px 0 0 100px; border-right: none; }
+        
+        /* Jogadores */
+        .player { position: absolute; transition: left 1.2s cubic-bezier(0.34, 1.56, 0.64, 1); display: flex; align-items: center; z-index: 10; }
+        .jogador-info { background: rgba(0, 0, 0, 0.7); padding: 4px 10px; border-radius: 20px; border: 2px solid var(--laranja); margin-right: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .nome { color: #fff; font-size: 14px; font-weight: bold; white-space: nowrap; }
+        .pts { color: var(--laranja); font-size: 16px; font-weight: 900; }
+        .bola { font-size: 38px; filter: drop-shadow(2px 4px 4px rgba(0,0,0,0.6)); }
+        .bola.girando { animation: girarBola 1s linear infinite; }
+        @keyframes girarBola { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+
+        /* Sidebar Glassmorphism */
+        .sidebar { background: rgba(255, 255, 255, 0.95); border-radius: 15px; padding: 25px; max-height: 850px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        h3 { color: var(--azul); margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        
+        /* Controles */
+        input { width: 100%; padding: 10px; margin: 5px 0 15px 0; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; }
+        button { border: none; border-radius: 8px; padding: 8px 12px; margin: 3px; font-weight: bold; color: #fff; background: var(--azul); cursor: pointer; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        button:active { transform: translateY(0); }
+        .btn-add { width: 100%; padding: 12px; background: #28a745; font-size: 16px; margin-bottom: 20px; }
+        .laranja { background: var(--laranja); }
+        .perigo { background: #dc3545; }
+        
+        /* Cards do Painel */
+        .card { background: #f8f9fa; border-left: 5px solid var(--azul); border-radius: 8px; padding: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card input { margin: 0; width: 60%; padding: 6px; border: none; background: transparent; font-weight: bold; color: var(--azul); font-size: 16px; }
+        .card input:focus { background: #fff; border-bottom: 1px solid var(--azul); outline: none; }
+        .btn-group { display: flex; flex-wrap: wrap; gap: 5px; }
+        .btn-group button { flex: 1; padding: 10px 0; font-size: 14px; }
+
+        /* Efeito de Gol */
+        #golMsg {
+            display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); color: #fff; 
+            flex-direction: column; align-items: center; justify-content: center; z-index: 999;
+        }
+        .texto-gol { font-size: 100px; font-weight: 900; color: #FFD700; text-shadow: 0 0 20px var(--laranja), 0 0 40px #FF0000; animation: pulsaGol 0.5s alternate infinite; margin: 0; }
+        .nome-gol { font-size: 50px; margin-top: 10px; color: #fff; text-transform: uppercase; }
+        @keyframes pulsaGol { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+        /* Efeito Torcida */
+        .ambient-controls { background: #eef2f5; padding: 10px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+        .ambient-controls label { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; cursor: pointer; }
+    </style>
 </head>
 <body>
+
 <header>
-<h1>🏆 Lab InovAção - Copa do Mundo</h1>
-<p>Meta: 100 pontos</p>
+    <h1>🏆 Lab InovAção - O Jogo</h1>
+    <div class="meta-txt">Rumo aos 100 pontos!</div>
 </header>
 
-<div class="estadio"><div class="torcida">🏳️ ⚽ 🎉 🏳️ VAMOS TORCIDA! 🏳️ ⚽ 🎉 🏳️</div></div>
-
 <div class="layout">
-<div>
-<div class="campo" id="campo">
-<div class="circulo"></div>
-<div class="gol"></div>
+    <div class="estadio-container">
+        <div class="campo" id="campo">
+            <div class="circulo"></div>
+            <div class="ponto-central"></div>
+            <div class="meia-lua"></div>
+            <div class="area-gol"></div>
+            <div class="pequena-area"></div>
+        </div>
+    </div>
+
+    <div class="sidebar">
+        <h3>Nova Escalação</h3>
+        <input id="nomeNovo" placeholder="Nome do Participante / Equipe">
+        <button class="btn-add" onclick="add()">➕ Escalar Participante</button>
+
+        <h3>Efeitos Especiais</h3>
+        <div class="ambient-controls">
+            <label><input type="checkbox" id="somApito" checked> 📢 Apito do Árbitro</label>
+            <label><input type="checkbox" id="somGol" checked> 🎉 Vibração da Torcida no Gol</label>
+            <label><input type="checkbox" id="efeitoConfete" checked> 🎊 Efeito de Confetes</label>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button style="flex: 1;" onclick="zerarTudo()">🔄 Zerar Placar</button>
+            <button style="flex: 1;" class="perigo" onclick="removerTodos()">🗑️ Excluir Todos</button>
+        </div>
+
+        <h3>Controle do Jogo</h3>
+        <div id="controles"></div>
+    </div>
 </div>
+
+<div id="golMsg">
+    <div class="texto-gol">GOOOOOOL!</div>
+    <div class="nome-gol" id="nomeArtilheiro">Equipe</div>
 </div>
 
-<div class="sidebar">
-<h3>Adicionar Participante</h3>
-<input id="nomeNovo" placeholder="Nome">
-<button onclick="add()">Adicionar</button>
-
-<h3>Som</h3>
-<label><input type="checkbox" id="somGol" checked> Som de Gol</label><br>
-<label><input type="checkbox" id="somTorcida" checked> Torcida</label><br>
-<label><input type="checkbox" id="silencioso"> Modo silencioso</label>
-
-<hr>
-<button onclick="zerarTudo()">🔄 Zerar Pontuações</button>
-<button class="laranja" onclick="removerTodos()">🗑️ Remover Todos</button>
-
-<h3>Ranking</h3>
-<div id="ranking"></div>
-
-<h3>Controle</h3>
-<div id="controles"></div>
-</div>
-</div>
-
-<div id="golMsg">⚽ GOOOOOOL! ⚽</div>
+<audio id="audioGolFx" src="https://www.soundjay.com/human/sounds/crowd-cheering-1.mp3" preload="auto"></audio>
+<audio id="audioApitoFx" src="https://www.soundjay.com/misc/sounds/referee-whistle-1.mp3" preload="auto"></audio>
 
 <script>
-let participantes=JSON.parse(localStorage.getItem('copaLab')||'[]');
+// Inicializando com alguns dados se estiver vazio para dar um "Gostinho" logo de cara
+let dadosIniciais = [
+    { id: 1, nome: "Carlos", pontos: 20 },
+    { id: 2, nome: "Kleber", pontos: 40 },
+    { id: 3, nome: "Bruna Baldan", pontos: 70 }
+];
 
-function save(){localStorage.setItem('copaLab',JSON.stringify(participantes));}
-
-function add(){
-let n=document.getElementById('nomeNovo').value.trim();
-if(!n)return;
-participantes.push({id:Date.now(),nome:n,pontos:0});
-document.getElementById('nomeNovo').value='';
-render();
+let participantes = JSON.parse(localStorage.getItem('copaLabInovacao'));
+if (!participantes || participantes.length === 0) {
+    participantes = dadosIniciais;
 }
 
-function editar(id,v){
-let p=participantes.find(x=>x.id===id);
-if(p){p.nome=v;save();render();}
+const audioGol = document.getElementById('audioGolFx');
+const audioApito = document.getElementById('audioApitoFx');
+
+function save() { localStorage.setItem('copaLabInovacao', JSON.stringify(participantes)); }
+
+function add() {
+    let n = document.getElementById('nomeNovo').value.trim();
+    if (!n) return;
+    participantes.push({ id: Date.now(), nome: n, pontos: 0 });
+    document.getElementById('nomeNovo').value = '';
+    tocarApito();
+    render();
 }
 
-function alterar(id,v){
-let p=participantes.find(x=>x.id===id);
-if(!p)return;
-p.pontos=Math.max(0,p.pontos+v);
-if(p.pontos>=100)gol(p.nome);
-render();
+function editar(id, v) {
+    let p = participantes.find(x => x.id === id);
+    if (p) { p.nome = v; save(); render(); }
 }
 
-function excluirP(id){
-participantes=participantes.filter(x=>x.id!==id);
-render();
+function alterar(id, v) {
+    let p = participantes.find(x => x.id === id);
+    if (!p) return;
+    
+    let pontosAnteriores = p.pontos;
+    p.pontos = Math.max(0, p.pontos + v);
+    
+    // Anima a bola girando se ganhou pontos
+    if(v > 0) animarBola(id);
+
+    if (p.pontos >= 100 && pontosAnteriores < 100) {
+        dispararGol(p.nome);
+    } else {
+        if(v > 0) tocarApito(); // Apita a cada jogada normal
+    }
+    render();
 }
 
-function zerarP(id){
-let p=participantes.find(x=>x.id===id);
-if(p){p.pontos=0;render();}
+function excluirP(id) {
+    if(confirm('Expulsar jogador de campo?')) {
+        participantes = participantes.filter(x => x.id !== id);
+        render();
+    }
 }
 
-function zerarTudo(){participantes.forEach(p=>p.pontos=0);render();}
-function removerTodos(){if(confirm('Remover todos?')){participantes=[];render();}}
-
-function gol(nome){
-if(document.getElementById('silencioso').checked)return;
-let m=document.getElementById('golMsg');
-m.innerHTML='⚽ GOOOOOOL!<br>'+nome;
-m.style.display='flex';
-setTimeout(()=>m.style.display='none',3000);
-
-if(document.getElementById('somGol').checked){
-let ctx=new(window.AudioContext||window.webkitAudioContext)();
-let o=ctx.createOscillator(); let g=ctx.createGain();
-o.connect(g); g.connect(ctx.destination);
-o.frequency.value=600; o.start();
-g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.5);
-o.stop(ctx.currentTime+0.5);
-}
+function zerarP(id) {
+    let p = participantes.find(x => x.id === id);
+    if (p) { p.pontos = 0; render(); }
 }
 
-function render(){
-save();
-
-let rank=[...participantes].sort((a,b)=>b.pontos-a.pontos);
-
-document.getElementById('ranking').innerHTML=rank.map((p,i)=>
-`<div class='rank'>${i==0?'🥇':i==1?'🥈':i==2?'🥉':(i+1)+'º'} ${p.nome}<b>${p.pontos}</b></div>`).join('');
-
-document.getElementById('controles').innerHTML=participantes.map(p=>`
-<div class='card'>
-<input value="${p.nome}" onchange="editar(${p.id},this.value)">
-<div>${p.pontos} pts</div>
-<button onclick="alterar(${p.id},10)">+10</button>
-<button onclick="alterar(${p.id},20)">+20</button>
-<button onclick="alterar(${p.id},50)">+50</button>
-<button class="laranja" onclick="alterar(${p.id},-10)">-10</button><br>
-<button onclick="zerarP(${p.id})">🔄</button>
-<button class="laranja" onclick="excluirP(${p.id})">🗑️</button>
-</div>`).join('');
-
-let campo=document.getElementById('campo');
-campo.querySelectorAll('.player').forEach(e=>e.remove());
-
-rank.forEach((p,i)=>{
-let d=document.createElement('div');
-d.className='player';
-d.style.top=(20+i*40)+'px';
-d.style.left=Math.min((p.pontos/100)*90,90)+'%';
-d.innerHTML=`<div class='nome'>${p.nome}</div><div class='bola'>⚽</div><div class='pts'>${p.pontos} pts</div>`;
-campo.appendChild(d);
-});
+function zerarTudo() { 
+    if(confirm('Tem certeza que deseja zerar os pontos de todos?')) {
+        participantes.forEach(p => p.pontos = 0); 
+        render(); 
+    }
 }
+
+function removerTodos() { 
+    if(confirm('Encerrar partida e remover todos os times?')) { 
+        participantes = []; 
+        render(); 
+    }
+}
+
+// EFEITOS
+function tocarApito() {
+    if (document.getElementById('somApito').checked) {
+        audioApito.currentTime = 0;
+        audioApito.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+    }
+}
+
+function dispararGol(nome) {
+    let m = document.getElementById('golMsg');
+    document.getElementById('nomeArtilheiro').innerText = nome;
+    m.style.display = 'flex';
+    
+    if (document.getElementById('somGol').checked) {
+        audioGol.currentTime = 0;
+        audioGol.play().catch(e => console.log("Áudio bloqueado"));
+    }
+    
+    if (document.getElementById('efeitoConfete').checked && typeof confetti === 'function') {
+        var duration = 3000;
+        var end = Date.now() + duration;
+        (function frame() {
+            confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#005596', '#ff7f00'] });
+            confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#005596', '#ff7f00'] });
+            if (Date.now() < end) { requestAnimationFrame(frame); }
+        }());
+    }
+
+    setTimeout(() => { m.style.display = 'none'; }, 4000);
+}
+
+function animarBola(id) {
+    setTimeout(() => {
+        let bola = document.getElementById(`bola-${id}`);
+        if(bola) {
+            bola.classList.add('girando');
+            setTimeout(() => bola.classList.remove('girando'), 1200);
+        }
+    }, 100);
+}
+
+function render() {
+    save();
+    let rank = [...participantes].sort((a, b) => b.pontos - a.pontos);
+
+    document.getElementById('controles').innerHTML = participantes.map(p => `
+    <div class='card'>
+        <div class='card-header'>
+            <input value="${p.nome}" onchange="editar(${p.id}, this.value)">
+            <strong style="color: var(--laranja); font-size: 18px;">${p.pontos} pts</strong>
+        </div>
+        <div class='btn-group'>
+            <button onclick="alterar(${p.id}, 10)">+10</button>
+            <button onclick="alterar(${p.id}, 20)">+20</button>
+            <button onclick="alterar(${p.id}, 50)">+50</button>
+            <button class="laranja" onclick="alterar(${p.id}, -10)">VAR (-10)</button>
+        </div>
+        <div style="margin-top: 5px; text-align: right;">
+            <button style="background: transparent; border: 1px solid #ccc; color: #666;" onclick="zerarP(${p.id})">🔄 Zerar</button>
+            <button style="background: transparent; border: 1px solid #dc3545; color: #dc3545;" onclick="excluirP(${p.id})">🗑️ Expulsar</button>
+        </div>
+    </div>`).join('');
+
+    let campo = document.getElementById('campo');
+    campo.querySelectorAll('.player').forEach(e => e.remove());
+
+    rank.forEach((p, i) => {
+        let d = document.createElement('div');
+        d.className = 'player';
+        // Distribui os jogadores no campo dependendo de quantos são
+        let espacamentoY = rank.length > 8 ? 60 : 90; 
+        d.style.top = (40 + i * espacamentoY) + 'px';
+        
+        // Calcula a posição (máximo 88% para não sair do campo e entrar direto no gol)
+        let progresso = Math.min((p.pontos / 100) * 88, 88);
+        d.style.left = progresso + '%';
+        
+        d.innerHTML = `
+            <div class='jogador-info'>
+                <span class='nome'>${i+1}º ${p.nome}</span>
+                <span class='pts'>${p.pontos}</span>
+            </div>
+            <div class='bola' id='bola-${p.id}'>⚽</div>
+        `;
+        campo.appendChild(d);
+    });
+}
+
+// Render inicial
 render();
 </script>
 </body>
