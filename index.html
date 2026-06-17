@@ -1475,16 +1475,14 @@ rank.forEach((p, i) => {
 
 const CLOUD_PATH = 'placares/copa-lab-animada';
 
-// Para salvar na nuvem usando GitHub Pages, crie um projeto no Firebase
-// Realtime Database e cole aqui as chaves de configuracao do seu app web.
+// Configuração oficial do seu projeto no Firebase
 const firebaseConfig = {
-    apiKey: '',
-    authDomain: '',
-    databaseURL: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: ''
+    apiKey: "AIzaSyB-XwlSKLe8qRkv9dPVnZxdvnUUXZmyo3A",
+    authDomain: "ranking-fe83b.firebaseapp.com",
+    projectId: "ranking-fe83b",
+    storageBucket: "ranking-fe83b.firebasestorage.app",
+    messagingSenderId: "436013642958",
+    appId: "1:436013642958:web:1ed41d45ad740b5cf34c9f"
 };
 
 const APP_STATE = {
@@ -1748,425 +1746,430 @@ function criarBufferTorcida(ctx){
     return buffer;
 }
 
-function iniciarTorcida(){
-    const ambiente = document.getElementById('somAmbiente');
-    if(ambiente && !ambiente.checked) return;
-    if(APP_STATE.torcida) return;
+window.iniciarTorcida = function(){
+        const ambiente = document.getElementById('somAmbiente');
+        if(ambiente && !ambiente.checked) return;
+        if(APP_STATE.torcida) return;
 
-    prepararAudio()
-        .then(ctx => {
-            const source = ctx.createBufferSource();
-            const filter = ctx.createBiquadFilter();
-            const gain = ctx.createGain();
-            const lfo = ctx.createOscillator();
-            const lfoGain = ctx.createGain();
+        window.prepararAudio()
+            .then(ctx => {
+                const source = ctx.createBufferSource();
+                const filter = ctx.createBiquadFilter();
+                const gain = ctx.createGain();
+                const lfo = ctx.createOscillator();
+                const lfoGain = ctx.createGain();
 
-            source.buffer = criarBufferTorcida(ctx);
-            source.loop = true;
+                source.buffer = window.criarBufferTorcida(ctx);
+                source.loop = true;
 
-            filter.type = 'bandpass';
-            filter.frequency.value = 620;
-            filter.Q.value = .75;
+                filter.type = 'bandpass';
+                filter.frequency.value = 620;
+                filter.Q.value = .75;
 
-            gain.gain.value = .032;
+                gain.gain.value = .032;
 
-            lfo.frequency.value = .32;
-            lfoGain.gain.value = .008;
+                lfo.frequency.value = .32;
+                lfoGain.gain.value = .008;
 
-            source.connect(filter);
-            filter.connect(gain);
-            gain.connect(ctx.destination);
-            lfo.connect(lfoGain);
-            lfoGain.connect(gain.gain);
+                source.connect(filter);
+                filter.connect(gain);
+                gain.connect(ctx.destination);
+                lfo.connect(lfoGain);
+                lfoGain.connect(gain.gain);
 
-            source.start();
-            lfo.start();
+                source.start();
+                lfo.start();
 
-            APP_STATE.torcida = {source,filter,gain,lfo,lfoGain};
-        })
-        .catch(() => atualizarBotaoSom(false,true));
-}
+                APP_STATE.torcida = {source,filter,gain,lfo,lfoGain};
+            })
+            .catch(() => window.atualizarBotaoSom(false,true));
+    }
 
-function pararTorcida(){
-    if(!APP_STATE.torcida || !APP_STATE.audioCtx) return;
+    window.pararTorcida = function(){
+        if(!APP_STATE.torcida || !APP_STATE.audioCtx) return;
 
-    const ctx = APP_STATE.audioCtx;
-    const torcidaAtual = APP_STATE.torcida;
-    APP_STATE.torcida = null;
+        const ctx = APP_STATE.audioCtx;
+        const torcidaAtual = APP_STATE.torcida;
+        APP_STATE.torcida = null;
 
-    try{
-        torcidaAtual.gain.gain.setTargetAtTime(.0001, ctx.currentTime, .18);
+        try{
+            torcidaAtual.gain.gain.setTargetAtTime(.0001, ctx.currentTime, .18);
 
-        setTimeout(() => {
-            try{
-                torcidaAtual.source.stop();
-                torcidaAtual.lfo.stop();
-                torcidaAtual.source.disconnect();
-                torcidaAtual.lfo.disconnect();
-            }catch(erro){
-                console.warn('Erro ao parar torcida:', erro);
+            setTimeout(() => {
+                try{
+                    torcidaAtual.source.stop();
+                    torcidaAtual.lfo.stop();
+                    torcidaAtual.source.disconnect();
+                    torcidaAtual.lfo.disconnect();
+                }catch(erro){
+                    console.warn('Erro ao parar torcida:', erro);
+                }
+            }, 360);
+        }catch(erro){
+            console.warn('Erro ao encerrar audio ambiente:', erro);
+        }
+    }
+
+    window.toggleAmbiente = function(){
+        if(document.getElementById('somAmbiente').checked){
+            window.iniciarTorcida();
+        }else{
+            window.pararTorcida();
+        }
+    }
+
+    window.tocarTom = function(ctx,frequencia,inicio,duracao,volume,tipo,frequenciaFinal){
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = tipo || 'sine';
+        osc.frequency.setValueAtTime(frequencia, inicio);
+
+        if(frequenciaFinal){
+            osc.frequency.exponentialRampToValueAtTime(
+                frequenciaFinal,
+                inicio + duracao * .88
+            );
+        }
+
+        gain.gain.setValueAtTime(.0001, inicio);
+        gain.gain.exponentialRampToValueAtTime(volume, inicio + .018);
+        gain.gain.exponentialRampToValueAtTime(.0001, inicio + duracao);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(inicio);
+        osc.stop(inicio + duracao + .05);
+    }
+
+    window.tocarRuido = function(ctx,inicio,duracao,volume,frequencia,tipo){
+        const tamanho = Math.max(1, Math.floor(ctx.sampleRate * duracao));
+        const buffer = ctx.createBuffer(1, tamanho, ctx.sampleRate);
+        const dados = buffer.getChannelData(0);
+
+        for(let i=0;i<tamanho;i++){
+            const progresso = i / tamanho;
+            const envelope = Math.sin(Math.PI * progresso);
+            dados[i] = (Math.random() * 2 - 1) * envelope;
+        }
+
+        const source = ctx.createBufferSource();
+        const filter = ctx.createBiquadFilter();
+        const gain = ctx.createGain();
+
+        source.buffer = buffer;
+        filter.type = tipo || 'bandpass';
+        filter.frequency.value = frequencia || 850;
+        filter.Q.value = .9;
+        gain.gain.value = volume;
+
+        source.connect(filter);
+        filter.connect(gain);
+        gain.connect(ctx.destination);
+        source.start(inicio);
+        source.stop(inicio + duracao);
+    }
+
+    window.tocarApito = function(curto){
+        if(!document.getElementById('somApito').checked) return;
+
+        window.prepararAudio()
+            .then(ctx => {
+                const inicio = ctx.currentTime + .01;
+                const duracao = curto ? .13 : .24;
+
+                window.tocarTom(ctx, 1450, inicio, duracao, .13, 'sine', 1900);
+                window.tocarTom(ctx, 980, inicio + duracao * .55, duracao * .78, .08, 'square', 1280);
+            })
+            .catch(() => {});
+    }
+
+    window.tocarGol = function(){
+        if(!document.getElementById('somGol').checked) return;
+
+        window.prepararAudio()
+            .then(ctx => {
+                const inicio = ctx.currentTime + .02;
+                const notas = [392,523,659,784,1046];
+
+                notas.forEach((nota,indice) => {
+                    window.tocarTom(ctx, nota, inicio + indice * .09, .22, .09, 'triangle');
+                });
+
+                window.tocarRuido(ctx, inicio + .16, 1.45, .18, 780, 'bandpass');
+                window.tocarRuido(ctx, inicio + .55, .75, .12, 1250, 'highpass');
+            })
+            .catch(() => {});
+    }
+
+    // ==========================================
+    // FUNÇÕES INTEGRADAS AO FIREBASE
+    // ==========================================
+
+    window.add = async function(){
+        const inputNome = document.getElementById('nomeNovo');
+        const nome = inputNome.value.trim();
+        const avatar = document.getElementById('avatarNovo').value;
+
+        if(!nome){
+            inputNome.focus();
+            return;
+        }
+
+        let idUnico = Date.now().toString();
+        let novoJogador = {
+            id: idUnico,
+            nome: nome.slice(0,60),
+            avatar: avatar,
+            pontos: 0
+        };
+
+        // Salva online
+        await setDoc(doc(db, "ranking", idUnico), novoJogador);
+
+        inputNome.value = '';
+        window.tocarApito();
+    }
+
+    window.editar = async function(id,valor){
+        const p = participantes.find(item => item.id === id || item.id === id.toString());
+        if(!p) return;
+
+        const nome = String(valor || '').trim().slice(0,60);
+        if(!nome) return;
+
+        p.nome = nome;
+        await setDoc(doc(db, "ranking", p.id.toString()), p);
+    }
+
+    window.alterar = async function(id,valor){
+        const p = participantes.find(item => item.id === id || item.id === id.toString());
+        if(!p) return;
+
+        const anterior = p.pontos;
+        p.pontos = Math.max(0, p.pontos + valor);
+
+        const marcouGol = valor > 0 && p.pontos >= 100 && anterior < 100;
+
+        if(valor > 0){
+            window.animarBola(id);
+            window.mostrarPontos(id, valor);
+        }
+
+        if(marcouGol){
+            window.dispararGol(p.nome);
+        }else if(valor > 0){
+            window.tocarApito();
+        }
+
+        // Atualiza online (a tela redesenha sozinha pelo onSnapshot que colocamos no topo)
+        await setDoc(doc(db, "ranking", p.id.toString()), p);
+    }
+
+    window.excluirP = async function(id){
+        if(confirm('Expulsar participante?')){
+            await deleteDoc(doc(db, "ranking", id.toString()));
+        }
+    }
+
+    window.limparParticipantes = async function(){
+        if(confirm('Remover todos os participantes?')){
+            for (const p of participantes) {
+                await deleteDoc(doc(db, "ranking", p.id.toString()));
             }
-        }, 360);
-    }catch(erro){
-        console.warn('Erro ao encerrar audio ambiente:', erro);
-    }
-}
-
-function toggleAmbiente(){
-    if(document.getElementById('somAmbiente').checked){
-        iniciarTorcida();
-    }else{
-        pararTorcida();
-    }
-}
-
-function tocarTom(ctx,frequencia,inicio,duracao,volume,tipo,frequenciaFinal){
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
-    osc.type = tipo || 'sine';
-    osc.frequency.setValueAtTime(frequencia, inicio);
-
-    if(frequenciaFinal){
-        osc.frequency.exponentialRampToValueAtTime(
-            frequenciaFinal,
-            inicio + duracao * .88
-        );
+            if(typeof window.fecharConfig === 'function') window.fecharConfig();
+        }
     }
 
-    gain.gain.setValueAtTime(.0001, inicio);
-    gain.gain.exponentialRampToValueAtTime(volume, inicio + .018);
-    gain.gain.exponentialRampToValueAtTime(.0001, inicio + duracao);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start(inicio);
-    osc.stop(inicio + duracao + .05);
-}
-
-function tocarRuido(ctx,inicio,duracao,volume,frequencia,tipo){
-    const tamanho = Math.max(1, Math.floor(ctx.sampleRate * duracao));
-    const buffer = ctx.createBuffer(1, tamanho, ctx.sampleRate);
-    const dados = buffer.getChannelData(0);
-
-    for(let i=0;i<tamanho;i++){
-        const progresso = i / tamanho;
-        const envelope = Math.sin(Math.PI * progresso);
-        dados[i] = (Math.random() * 2 - 1) * envelope;
+    window.zerarTudo = async function(){
+        if(confirm('Zerar pontuação de todos?')){
+            for (const p of participantes) {
+                p.pontos = 0;
+                await setDoc(doc(db, "ranking", p.id.toString()), p);
+            }
+            if(typeof window.fecharConfig === 'function') window.fecharConfig();
+        }
     }
 
-    const source = ctx.createBufferSource();
-    const filter = ctx.createBiquadFilter();
-    const gain = ctx.createGain();
+    // ==========================================
+    // ANIMAÇÕES E RENDERIZAÇÃO
+    // ==========================================
 
-    source.buffer = buffer;
-    filter.type = tipo || 'bandpass';
-    filter.frequency.value = frequencia || 850;
-    filter.Q.value = .9;
-    gain.gain.value = volume;
+    window.dispararGol = function(nome){
+        const modal = document.getElementById('golMsg');
+        const nomeArtilheiro = document.getElementById('nomeArtilheiro');
 
-    source.connect(filter);
-    filter.connect(gain);
-    gain.connect(ctx.destination);
-    source.start(inicio);
-    source.stop(inicio + duracao);
-}
-
-function tocarApito(curto){
-    if(!document.getElementById('somApito').checked) return;
-
-    prepararAudio()
-        .then(ctx => {
-            const inicio = ctx.currentTime + .01;
-            const duracao = curto ? .13 : .24;
-
-            tocarTom(ctx, 1450, inicio, duracao, .13, 'sine', 1900);
-            tocarTom(ctx, 980, inicio + duracao * .55, duracao * .78, .08, 'square', 1280);
-        })
-        .catch(() => {});
-}
-
-function tocarGol(){
-    if(!document.getElementById('somGol').checked) return;
-
-    prepararAudio()
-        .then(ctx => {
-            const inicio = ctx.currentTime + .02;
-            const notas = [392,523,659,784,1046];
-
-            notas.forEach((nota,indice) => {
-                tocarTom(ctx, nota, inicio + indice * .09, .22, .09, 'triangle');
-            });
-
-            tocarRuido(ctx, inicio + .16, 1.45, .18, 780, 'bandpass');
-            tocarRuido(ctx, inicio + .55, .75, .12, 1250, 'highpass');
-        })
-        .catch(() => {});
-}
-
-function add(){
-    const inputNome = document.getElementById('nomeNovo');
-    const nome = inputNome.value.trim();
-    const avatar = document.getElementById('avatarNovo').value;
-
-    if(!nome){
-        inputNome.focus();
-        return;
-    }
-
-    participantes.push({
-        id:gerarId(),
-        nome:nome.slice(0,60),
-        avatar,
-        pontos:0
-    });
-
-    inputNome.value = '';
-    tocarApito();
-    render();
-}
-
-function editar(id,valor){
-    const p = participantes.find(item => item.id === id);
-    if(!p) return;
-
-    const nome = String(valor || '').trim().slice(0,60);
-    if(!nome) return;
-
-    p.nome = nome;
-    render();
-}
-
-function alterar(id,valor){
-    const p = participantes.find(item => item.id === id);
-    if(!p) return;
-
-    const anterior = p.pontos;
-    p.pontos = Math.max(0, p.pontos + valor);
-
-    const marcouGol = valor > 0 && p.pontos >= 100 && anterior < 100;
-
-    render();
-
-    if(valor > 0){
-        animarBola(id);
-        mostrarPontos(id, valor);
-    }
-
-    if(marcouGol){
-        dispararGol(p.nome);
-    }else if(valor > 0){
-        tocarApito();
-    }
-}
-
-function dispararGol(nome){
-    const modal = document.getElementById('golMsg');
-    const nomeArtilheiro = document.getElementById('nomeArtilheiro');
-
-    nomeArtilheiro.innerText = nome;
-    modal.classList.add('ativo');
-    modal.style.display = 'flex';
-
-    tocarGol();
-
-    if(
-        document.getElementById('efeitoConfete').checked &&
-        typeof confetti === 'function'
-    ){
-        confetti({
-            particleCount:220,
-            spread:170,
-            scalar:1.1,
-            origin:{y:.62}
-        });
-
-        setTimeout(() => {
-            confetti({
-                particleCount:120,
-                spread:120,
-                startVelocity:42,
-                origin:{x:.18,y:.72}
-            });
-
-            confetti({
-                particleCount:120,
-                spread:120,
-                startVelocity:42,
-                origin:{x:.82,y:.72}
-            });
-        }, 280);
-    }
-
-    clearTimeout(APP_STATE.golTimer);
-    APP_STATE.golTimer = setTimeout(() => {
-        modal.classList.remove('ativo');
-        modal.style.display = 'none';
-    }, 3800);
-}
-
-function animarBola(id){
-    requestAnimationFrame(() => {
-        const bola = document.getElementById(`bola-${id}`);
-        if(!bola) return;
-
-        bola.classList.remove('girando');
-        void bola.offsetWidth;
-        bola.classList.add('girando');
-
-        setTimeout(() => {
-            bola.classList.remove('girando');
-        }, 900);
-    });
-}
-
-function mostrarPontos(id,valor){
-    const player = document.getElementById(`player-${id}`);
-    if(!player) return;
-
-    const tag = document.createElement('span');
-    tag.className = 'pontos-pop';
-    tag.textContent = `+${valor}`;
-    player.appendChild(tag);
-
-    setTimeout(() => tag.remove(), 920);
-}
-
-function excluirP(id){
-    if(confirm('Expulsar participante?')){
-        participantes = participantes.filter(item => item.id !== id);
-        render();
-    }
-}
-
-function limparParticipantes(){
-    if(confirm('Remover todos os participantes?')){
-        participantes = [];
-        render();
-        fecharConfig();
-    }
-}
-
-function zerarTudo(){
-    if(confirm('Zerar pontuacao de todos?')){
-        participantes.forEach(item => item.pontos = 0);
-        render();
-        fecharConfig();
-    }
-}
-
-function escapeHTML(valor){
-    return String(valor).replace(/[&<>"']/g, char => ({
-        '&':'&amp;',
-        '<':'&lt;',
-        '>':'&gt;',
-        '"':'&quot;',
-        "'":'&#39;'
-    }[char]));
-}
-
-function render(deveSalvar = true){
-    if(deveSalvar){
-        save();
-    }
-
-    const rank = [...participantes].sort((a,b) => {
-        if(b.pontos !== a.pontos) return b.pontos - a.pontos;
-        return a.nome.localeCompare(b.nome, 'pt-BR');
-    });
-
-    document.getElementById('controles').innerHTML = participantes.map(p => {
-        const nome = escapeHTML(p.nome);
-        const avatar = escapeHTML(p.avatar);
-
-        return `
-            <div class="card">
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
-                    <div style="display:flex; align-items:center; gap:5px; width:100%; min-width:0;">
-                        <span style="font-size:20px;">${avatar}</span>
-                        <input value="${nome}" onchange="editar(${p.id}, this.value)">
-                    </div>
-                    <strong style="color: var(--laranja); font-size: 18px; white-space:nowrap;">${p.pontos} pts</strong>
-                </div>
-                <div class="btn-group">
-                    <button onclick="alterar(${p.id}, 6)">+6</button>
-                    <button onclick="alterar(${p.id}, 8)">+8</button>
-                    <button onclick="alterar(${p.id}, 10)">+10</button>
-                    <button onclick="alterar(${p.id}, 20)">+20</button>
-                    <button onclick="alterar(${p.id}, 25)">+25</button>
-                    <button onclick="alterar(${p.id}, 50)">+50</button>
-                    <button title="Remover participante" style="background:transparent; color:#dc3545; border:1px solid #dc3545" onclick="excluirP(${p.id})">&#128465;</button>
-                    <button class="btn-var" onclick="alterar(${p.id}, -10)">VAR (-10 pts)</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    const campo = document.getElementById('campo');
-    const alturaNecessaria = Math.max(2800, rank.length * 76 + 220);
-    campo.style.height = alturaNecessaria + 'px';
-
-    const idsAtuais = new Set();
-
-    rank.forEach((p,indice) => {
-        const idPlayer = `player-${p.id}`;
-        let player = document.getElementById(idPlayer);
-        const novo = !player;
-        const progresso = Math.min((p.pontos / 100) * 88, 88);
-        const anterior = Number(player && player.dataset.progresso || 0);
-
-        if(!player){
-            player = document.createElement('div');
-            player.id = idPlayer;
-            player.className = 'player entrando';
-            player.style.left = '0%';
-            campo.appendChild(player);
-
-            setTimeout(() => {
-                player.classList.remove('entrando');
-            }, 520);
+        if(nomeArtilheiro) nomeArtilheiro.innerText = nome;
+        if(modal){
+            modal.classList.add('ativo');
+            modal.style.display = 'flex';
         }
 
-        idsAtuais.add(idPlayer);
+        window.tocarGol();
 
-        player.style.top = (40 + indice * 76) + 'px';
-        player.dataset.progresso = progresso;
-        player.innerHTML = `
-            <div class="jogador-info">
-                <span class="avatar-em-campo">${escapeHTML(p.avatar)}</span>
-                <span class="nome">${escapeHTML(p.nome)}</span>
-                <span class="pts">${p.pontos}</span>
-            </div>
-
-            <div class="bola" id="bola-${p.id}">
-                &#9917;
-            </div>
-        `;
-
-        if(!novo && progresso > anterior){
-            player.classList.remove('avancando');
-            void player.offsetWidth;
-            player.classList.add('avancando');
+        if(
+            document.getElementById('efeitoConfete') && document.getElementById('efeitoConfete').checked &&
+            typeof confetti === 'function'
+        ){
+            confetti({
+                particleCount:220,
+                spread:170,
+                scalar:1.1,
+                origin:{y:.62}
+            });
 
             setTimeout(() => {
-                player.classList.remove('avancando');
-            }, 760);
+                confetti({ particleCount:120, spread:120, startVelocity:42, origin:{x:.18,y:.72} });
+                confetti({ particleCount:120, spread:120, startVelocity:42, origin:{x:.82,y:.72} });
+            }, 280);
         }
 
+        clearTimeout(APP_STATE.golTimer);
+        APP_STATE.golTimer = setTimeout(() => {
+            if(modal){
+                modal.classList.remove('ativo');
+                modal.style.display = 'none';
+            }
+        }, 3800);
+    }
+
+    window.animarBola = function(id){
         requestAnimationFrame(() => {
-            player.style.left = progresso + '%';
+            const bola = document.getElementById(`bola-${id}`);
+            if(!bola) return;
+
+            bola.classList.remove('girando');
+            void bola.offsetWidth;
+            bola.classList.add('girando');
+
+            setTimeout(() => {
+                bola.classList.remove('girando');
+            }, 900);
         });
-    });
+    }
 
-    campo.querySelectorAll('.player').forEach(player => {
-        if(idsAtuais.has(player.id)) return;
+    window.mostrarPontos = function(id,valor){
+        const player = document.getElementById(`player-${id}`);
+        if(!player) return;
 
-        player.classList.add('saindo');
-        setTimeout(() => player.remove(), 280);
-    });
-}
+        const tag = document.createElement('span');
+        tag.className = 'pontos-pop';
+        tag.textContent = `+${valor}`;
+        player.appendChild(tag);
 
-iniciarAplicacao();
+        setTimeout(() => tag.remove(), 920);
+    }
+
+    window.escapeHTML = function(valor){
+        return String(valor).replace(/[&<>"']/g, char => ({
+            '&':'&amp;',
+            '<':'&lt;',
+            '>':'&gt;',
+            '"':'&quot;',
+            "'":'&#39;'
+        }[char]));
+    }
+
+    window.render = function(){
+        const rank = [...participantes].sort((a,b) => {
+            if(b.pontos !== a.pontos) return b.pontos - a.pontos;
+            return a.nome.localeCompare(b.nome, 'pt-BR');
+        });
+
+        document.getElementById('controles').innerHTML = participantes.map(p => {
+            const nome = window.escapeHTML(p.nome);
+            const avatar = window.escapeHTML(p.avatar);
+
+            return `
+                <div class="card">
+                    <div style="display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                        <div style="display:flex; align-items:center; gap:5px; width:100%; min-width:0;">
+                            <span style="font-size:20px;">${avatar}</span>
+                            <input value="${nome}" onchange="editar('${p.id}', this.value)">
+                        </div>
+                        <strong style="color: var(--laranja); font-size: 18px; white-space:nowrap;">${p.pontos} pts</strong>
+                    </div>
+                    <div class="btn-group">
+                        <button onclick="alterar('${p.id}', 6)">+6</button>
+                        <button onclick="alterar('${p.id}', 8)">+8</button>
+                        <button onclick="alterar('${p.id}', 10)">+10</button>
+                        <button onclick="alterar('${p.id}', 20)">+20</button>
+                        <button onclick="alterar('${p.id}', 25)">+25</button>
+                        <button onclick="alterar('${p.id}', 50)">+50</button>
+                        <button title="Remover participante" style="background:transparent; color:#dc3545; border:1px solid #dc3545" onclick="excluirP('${p.id}')">&#128465;</button>
+                        <button class="btn-var" onclick="alterar('${p.id}', -10)">VAR (-10 pts)</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        const campo = document.getElementById('campo');
+        if(!campo) return;
+        
+        const alturaNecessaria = Math.max(2800, rank.length * 76 + 220);
+        campo.style.height = alturaNecessaria + 'px';
+
+        const idsAtuais = new Set();
+
+        rank.forEach((p,indice) => {
+            const idPlayer = `player-${p.id}`;
+            let player = document.getElementById(idPlayer);
+            const novo = !player;
+            const progresso = Math.min((p.pontos / 100) * 88, 88);
+            const anterior = Number(player && player.dataset.progresso || 0);
+
+            if(!player){
+                player = document.createElement('div');
+                player.id = idPlayer;
+                player.className = 'player entrando';
+                player.style.left = '0%';
+                campo.appendChild(player);
+
+                setTimeout(() => {
+                    player.classList.remove('entrando');
+                }, 520);
+            }
+
+            idsAtuais.add(idPlayer);
+
+            player.style.top = (40 + indice * 76) + 'px';
+            player.dataset.progresso = progresso;
+            player.innerHTML = `
+                <div class="jogador-info">
+                    <span class="avatar-em-campo">${window.escapeHTML(p.avatar)}</span>
+                    <span class="nome">${window.escapeHTML(p.nome)}</span>
+                    <span class="pts">${p.pontos}</span>
+                </div>
+
+                <div class="bola" id="bola-${p.id}">
+                    &#9917;
+                </div>
+            `;
+
+            if(!novo && progresso > anterior){
+                player.classList.remove('avancando');
+                void player.offsetWidth;
+                player.classList.add('avancando');
+
+                setTimeout(() => {
+                    player.classList.remove('avancando');
+                }, 760);
+            }
+
+            requestAnimationFrame(() => {
+                player.style.left = progresso + '%';
+            });
+        });
+
+        campo.querySelectorAll('.player').forEach(player => {
+            if(idsAtuais.has(player.id)) return;
+
+            player.classList.add('saindo');
+            setTimeout(() => player.remove(), 280);
+        });
+    }
+
+    if(typeof window.iniciarAplicacao === 'function') window.iniciarAplicacao();
 </script>
 </body>
 </html>
