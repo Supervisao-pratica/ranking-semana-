@@ -618,21 +618,22 @@
         }
 
         .btn-group{
-            display:grid;
-            grid-template-columns:repeat(4,1fr);
-            gap:4px;
-            margin-top:8px;
-        }
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:6px;
+    margin-top:8px;
+}
 
-        .btn-group button{
-            font-size:13px;
-            padding:6px 0;
-        }
+.btn-group button{
+    font-size:12px;
+    padding:8px 4px;
+    white-space:nowrap;
+}
 
-        .btn-var{
-            background:#dc3545;
-            grid-column:span 4;
-        }
+.btn-var{
+    background:#dc3545;
+    grid-column:span 2;
+}
 
         /* =========================
            MODAL
@@ -2094,15 +2095,23 @@ function render(deveSalvar = true){
                     <strong style="color: var(--laranja); font-size: 18px; white-space:nowrap;">${p.pontos} pts</strong>
                 </div>
                 <div class="btn-group">
-                    <button onclick="alterar(${p.id}, 6)">+6</button>
-                    <button onclick="alterar(${p.id}, 8)">+8</button>
-                    <button onclick="alterar(${p.id}, 10)">+10</button>
-                    <button onclick="alterar(${p.id}, 20)">+20</button>
-                    <button onclick="alterar(${p.id}, 25)">+25</button>
-                    <button onclick="alterar(${p.id}, 50)">+50</button>
-                    <button title="Remover participante" style="background:transparent; color:#dc3545; border:1px solid #dc3545" onclick="excluirP(${p.id})">&#128465;</button>
-                    <button class="btn-var" onclick="alterar(${p.id}, -10)">VAR (-10 pts)</button>
-                </div>
+    <button onclick="alterar(${p.id}, 10)">🏆 Kahoot +10</button>
+    <button onclick="alterar(${p.id}, 8)">🏆 Kahoot +8</button>
+    <button onclick="alterar(${p.id}, 6)">🏆 Kahoot +6</button>
+
+    <button onclick="alterar(${p.id}, 10)">📝 Forms +10</button>
+    <button onclick="alterar(${p.id}, 8)">📝 Forms +8</button>
+
+    <button onclick="alterar(${p.id}, 25)">🛠️ Prática +25</button>
+
+    <button onclick="alterar(${p.id}, 10)">⭐ Desempate +10</button>
+
+    <button title="Remover participante"
+            style="background:transparent; color:#dc3545; border:1px solid #dc3545"
+            onclick="excluirP(${p.id})">🗑️</button>
+
+    <button class="btn-var" onclick="alterar(${p.id}, -10)">VAR (-10 pts)</button>
+</div>
             </div>
         `;
     }).join('');
